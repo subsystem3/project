@@ -3,6 +3,8 @@ name: Test
 on:
   push:
     branches: [dev]
+  pull_request:
+    branches: [main]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -42,6 +44,10 @@ jobs:
             !/var/cache/apt/archives/lock
           key: ${{ runner.os }}-apt-${{ hashFiles('apt.txt') }}
           restore-keys: ${{ runner.os }}-apt-
+
+      - name: Test - Get Version
+        id: get_version
+        run: echo "version=$(cat release.txt)" >> $GITHUB_ENV
 
       - name: Test - Generate Project Report PDF
         run: |
