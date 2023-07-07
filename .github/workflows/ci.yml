@@ -22,8 +22,6 @@ permissions:
 jobs:
   docker:
     runs-on: ubuntu-latest
-    outputs:
-      modified: ${{ steps.check.outputs.modified }}
     steps:
     - name: Check out dev branch
       uses: actions/checkout@v3.5.3
