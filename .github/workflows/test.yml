@@ -1,9 +1,6 @@
 name: Test
 
 on:
-  pull_request:
-    branches: [main]
-    types: [opened, synchronize, reopened]
   push:
     branches: [dev]
 
@@ -16,7 +13,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  generate-pdf:
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Check out dev branch
