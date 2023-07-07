@@ -44,30 +44,37 @@ jobs:
           key: ${{ runner.os }}-apt-${{ hashFiles('apt.txt') }}
           restore-keys: ${{ runner.os }}-apt-
 
-      - name: Generate project report PDF
+      - name: Test - Generate Project Report PDF
         run: |
           # INSTALL PYTHON DEPENDENCIES
           python3 -m pip install --upgrade pip
           pip install nbconvert ipykernel
-          python3 -m ipykernel install --user
+          python3 -m pip install ipykernel nbconvert jupyterlab --user
 
           # INSTALL APT DEPENDENCIES
           sudo apt-get update
           sudo apt-get install -y pandoc texlive-xetex
-          pip install nbconvert jupyterlab
 
           # CONVERT NOTEBOOK TO PDF
-          jupyter nbconvert --to pdf --execute project.ipynb --output Final-Project-Report-Team-2.pdf
+          jupyter nbconvert --to pdf --execute project.ipynb --output Final-Project-Report-Team-2-NO-COVER.pdf
 
-      - name: Test - Get Version
+      - name: Add cover to the report
+        run: |
+          # INSTALL APT DEPENDENCIES
+          sudo apt-get update
+          sudo apt-get install -y pdftk
+
+          # ADD COVER
+          pdftk cover.pdf Final-Project-Report-Team-2-NO-COVER.pdf cat output Final-Project-Report-Team-2.pdf
+
+      - name: Get Version
         id: get_version
         run: echo "version=$(cat release.txt)" >> $GITHUB_ENV
 
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v0.1.15
         with:
           tag_name: ${{ env.version }}
-          release_name: ${{ env.version }}
           files: |
             Final-Project-Team-2.mp4
             Final-Project-Report-Team-2.pdf
