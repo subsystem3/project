@@ -1,2 +1,3 @@
 pandoc
+pdftk
 texlive-xetex
