@@ -61,7 +61,7 @@ jobs:
     needs: docker
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/${{ github.repository }}/build:${{ github.ref }}
+      image: ghcr.io/${{ github.repository }}/build:${{ github.sha }}
     steps:
       - name: Check out dev branch
         uses: actions/checkout@v3.5.3
