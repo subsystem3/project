@@ -1,3 +1,4 @@
+chktex
 pandoc
 pdftk
-texlive-xetex
+texlive-full
