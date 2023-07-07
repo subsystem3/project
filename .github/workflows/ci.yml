@@ -19,7 +19,7 @@ permissions:
   pull-requests: read
 
 jobs:
-  check:
+  docker:
     runs-on: ubuntu-latest
     outputs:
       modified: ${{ steps.check.outputs.modified }}
@@ -28,28 +28,7 @@ jobs:
       uses: actions/checkout@v3.5.3
       with:
         ref: dev
-        fetch-depth: '2'
-
-    - name: Check if Dockerfile was modified
-      id: check
-      run: |
-        DIFF=$(git diff --name-only HEAD~1 HEAD -- Dockerfile)
-        if [[ -n "$DIFF" ]]; then
-          echo "::set-output name=modified::true"
-        else
-          echo "::set-output name=modified::false"
-        fi
-
-  docker:
-    needs: check
-    if: needs.check.outputs.modified == 'true'
-    runs-on: ubuntu-latest
-    steps:
-    - name: Check out dev branch
-      uses: actions/checkout@v3.5.3
-      with:
-        ref: dev
-        fetch-depth: '2'
+        fetch-depth: '0'
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
