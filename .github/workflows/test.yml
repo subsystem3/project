@@ -43,6 +43,10 @@ jobs:
           key: ${{ runner.os }}-apt-${{ hashFiles('apt.txt') }}
           restore-keys: ${{ runner.os }}-apt-
 
+      - name: Test - Get Version
+        id: get_version
+        run: echo "version=$(cat release.txt)" >> $GITHUB_ENV
+
       - name: Test - Generate Project Report PDF
         run: |
           # INSTALL PYTHON DEPENDENCIES
