@@ -1,0 +1,61 @@
+name: Test
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [dev]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  generate-pdf:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out dev branch
+        uses: actions/checkout@v3.5.2
+        with:
+          ref: dev
+
+      - name: Set up Python
+        uses: actions/setup-python@v4.6.1
+        with:
+          python-version: "3.11.3"
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v3.3.1
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: ${{ runner.os }}-pip-
+
+      - name: Cache APT Packages
+        uses: actions/cache@v3.3.1
+        with:
+          path: |
+            /var/cache/apt/archives/**.deb
+            !/var/cache/apt/archives/partial
+            !/var/cache/apt/archives/lock
+          key: ${{ runner.os }}-apt-${{ hashFiles('apt.txt') }}
+          restore-keys: ${{ runner.os }}-apt-
+
+      - name: Test - Generate Project Report PDF
+        run: |
+          # INSTALL PYTHON DEPENDENCIES
+          python3 -m pip install --upgrade pip
+          pip install nbconvert ipykernel
+          python3 -m ipykernel install --user
+
+          # INSTALL APT DEPENDENCIES
+          sudo apt-get update
+          sudo apt-get install -y pandoc texlive-xetex
+          pip install nbconvert jupyterlab
+
+          # CONVERT NOTEBOOK TO PDF
+          jupyter nbconvert --to pdf --execute project.ipynb --output Final-Project-Report-Team-2.pdf
