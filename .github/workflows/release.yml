@@ -73,7 +73,7 @@ jobs:
             Final-Project-Report-Team-2.pdf
           body: |
             DELIVERABLES:
+            - [Final-Project-Report-Team-2.mp4](https://github.com/team2-su23-aai501/project/releases/download/${{ env.version }}/Final-Project-Team-2.mp4)
             - [Final-Project-Report-Team-2.pdf](https://github.com/team2-su23-aai501/project/releases/download/${{ env.version }}/Final-Project-Report-Team-2.pdf)
-            - [Final-Project-Report-Team-2.pdf](https://github.com/team2-su23-aai501/project/releases/download/${{ env.version }}/Final-Project-Team-2.mp4)
           draft: false
           prerelease: true
