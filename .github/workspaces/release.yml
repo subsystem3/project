@@ -1,0 +1,77 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out main branch
+        uses: actions/checkout@v3.5.2
+        with:
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v4.6.1
+        with:
+          python-version: "3.11.3"
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v3.3.1
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: ${{ runner.os }}-pip-
+
+      - name: Cache APT Packages
+        uses: actions/cache@v3.3.1
+        with:
+          path: |
+            /var/cache/apt/archives/**.deb
+            !/var/cache/apt/archives/partial
+            !/var/cache/apt/archives/lock
+          key: ${{ runner.os }}-apt-${{ hashFiles('apt.txt') }}
+          restore-keys: ${{ runner.os }}-apt-
+
+      - name: Generate project report PDF
+        run: |
+          # INSTALL PYTHON DEPENDENCIES
+          python3 -m pip install --upgrade pip
+          pip install nbconvert ipykernel
+          python3 -m ipykernel install --user
+
+          # INSTALL APT DEPENDENCIES
+          sudo apt-get update
+          sudo apt-get install -y pandoc texlive-xetex
+          pip install nbconvert jupyterlab
+
+          # CONVERT NOTEBOOK TO PDF
+          jupyter nbconvert --to pdf --execute project.ipynb --output Final-Project-Report-Team-2.pdf
+
+      - name: Get short SHA
+        run: echo "SHORT_SHA=$(echo ${GITHUB_SHA::7})" >> $GITHUB_ENV
+
+      - name: Release
+        uses: softprops/action-gh-release@v0.1.15
+        with:
+          tag_name: v1.0.4
+          release_name: Release v1.0.4
+          files: |
+            Final-Project-Team-2.mp4
+            Final-Project-Report-Team-2.pdf
+          body: |
+            DELIVERABLES:
+            - [Final-Project-Report-Team-2.pdf](https://github.com/team2-su23-aai501/project/raw/main/Final-Project-Report-Team-2.pdf)
+            - [Final-Project-Team-2.mp4](https://github.com/team2-su23-aai501/project/raw/main/Final-Project-Team-2.mp4)
+          draft: false
+          prerelease: false
