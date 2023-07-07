@@ -33,8 +33,12 @@ jobs:
     - name: Check if Dockerfile was modified
       id: check
       run: |
-        git fetch origin ${{ github.base_ref }}
-        DIFF=$(git diff --name-only origin/${{ github.base_ref }}..${{ github.sha }} -- Dockerfile)
+        if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+          git fetch origin ${{ github.base_ref }}
+          DIFF=$(git diff --name-only origin/${{ github.base_ref }}..${{ github.sha }} -- Dockerfile)
+        else
+          DIFF=$(git diff --name-only HEAD~1..HEAD -- Dockerfile)
+        fi
         if [[ -n "$DIFF" ]]; then
           echo "::set-output name=modified::true"
         else

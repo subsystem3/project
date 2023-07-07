@@ -1,5 +1,7 @@
 # Final Team Project
 
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/team2-su23-aai501/project/tree/dev?quickstart=1)
+
 ## Introduction
 
 The final team project in AAI 501 will give you an opportunity to identify an AI-driven problem, perform a hands-on project, and deliver a report and presentation as a team. To deliver a successful project, you should carefully read the final team project criteria and timelines.
