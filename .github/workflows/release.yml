@@ -11,27 +11,16 @@ concurrency:
 
 permissions:
   contents: write
-  packages: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/team2-su23-aai501/build-project:latest
     steps:
       - name: Check out dev branch
         uses: actions/checkout@v3.5.3
         with:
           ref: dev
           fetch-depth: '0'
-
-      - name: Generate PDFs
-        run: |
-          rm -f Final-Project-Report-Team-2.pdf
-          pdflatex Final-Project-Report-Team-2.tex
-
-          rm -f Project-Proposal-Team-2.pdf
-          pdflatex Project-Proposal-Team-2.tex
 
       - name: Get Version
         run: |
