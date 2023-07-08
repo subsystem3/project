@@ -10,9 +10,12 @@ concurrency:
 
 permissions:
   contents: write
+  packages: read
 
 jobs:
   build:
+    container:
+      image: ghcr.io/team2-su23-aai501/build-project:latest
     runs-on: ubuntu-latest
     steps:
       - name: Check out dev branch
@@ -21,19 +24,10 @@ jobs:
           ref: dev
           fetch-depth: '0'
 
-      - name: Delete old PDFs
+      - name: Generate PDFs
         run: |
           rm -f Final-Project-Report-Team-2.pdf
+          pdflatex Final-Project-Report-Team-2.tex
+
           rm -f Project-Proposal-Team-2.pdf
-
-      - name: Generate Project Report PDF
-        uses: docker://aergus/latex
-        with:
-          entrypoint: pdflatex
-          args: Final-Project-Report-Team-2.tex
-
-      - name: Generate Project Proposal PDF
-        uses: docker://aergus/latex
-        with:
-          entrypoint: pdflatex
-          args: Project-Proposal-Team-2.tex
+          pdflatex Project-Proposal-Team-2.tex
