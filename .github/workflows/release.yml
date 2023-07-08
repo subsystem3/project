@@ -11,8 +11,6 @@ concurrency:
 
 permissions:
   contents: write
-  packages: write
-  pull-requests: read
 
 jobs:
   build:
@@ -30,13 +28,13 @@ jobs:
           rm -f Project-Proposal-Team-2.pdf
 
       - name: Generate Project Report PDF
-        uses: docker://blang/latex:ubuntu
+        uses: docker://pandoc/latex
         with:
           entrypoint: pdflatex
           args: Final-Project-Report-Team-2.tex
 
       - name: Generate Project Proposal PDF
-        uses: docker://blang/latex:ubuntu
+        uses: docker://pandoc/latex
         with:
           entrypoint: pdflatex
           args: Project-Proposal-Team-2.tex
