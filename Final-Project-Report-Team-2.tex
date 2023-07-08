@@ -1,34 +1,71 @@
 \documentclass{article}
-\usepackage[utf8]{inputenc}
-\usepackage{pdfpages}
-\usepackage{graphicx}
-\usepackage{hyperref}
-\usepackage{amsmath}
-\usepackage{amsfonts}
-\usepackage{amssymb}
-\usepackage{natbib}
 \usepackage{algorithm}
 \usepackage{algorithmic}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{booktabs}
-\usepackage{longtable}
-\usepackage{tabularx}
-\usepackage{multirow}
-\usepackage{subcaption}
 \usepackage{float}
-
-\title{Final Team Project Report}
-\author{Team Members Names}
-\date{Due Date}
-
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{lipsum}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{natbib}
+\usepackage{pdfpages}
+\usepackage{setspace}
+\usepackage{subcaption}
+\usepackage{tabularx}
+\usepackage{tikz}
+\usepackage[utf8]{inputenc}
 \begin{document}
 
-\includepdf[pages={1}]{cover-report.pdf}
+\setstretch{1.15}
+\definecolor{blue}{RGB}{0,62,126}
 
-\maketitle
+\renewcommand{\titlepage}[2]{
+    \thispagestyle{empty}
+
+    \begin{tikzpicture}[remember picture, overlay]
+        \node [inner sep=0pt] at (current page.center) {#1};
+        {
+        \node [
+            anchor=center,
+            inner sep=1.25cm,
+            rectangle,
+            fill=blue!70!white,
+            fill opacity=0,
+            text opacity=1,
+            minimum height=0.2\paperheight,
+            minimum width=\paperwidth,
+            text width=0.8\paperwidth,
+            font=\fontfamily{pnc}\selectfont
+        ] at (current page.center) {#2};
+        }
+    \end{tikzpicture}
+
+    \newpage
+}
+
+{
+    \titlepage{\includegraphics[width=\paperwidth]{images/background.pdf}}
+    {
+        \centering\fontfamily{phv}\selectfont
+        {\Huge \bfseries Attention Is All You Need \par}
+        \vspace{8pt}
+        {\begin{center}
+                \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}c c c}
+                    {\LARGE Jonathan Agustin} &
+                    {\LARGE Fernando Calderon} &
+                    {\LARGE Juliet Lawton}
+                \end{tabular*}
+            \end{center}}
+        \vspace{24pt}
+        {\LARGE\bfseries \par}
+    }
+}
 
 \section{Introduction}
-
-\label{sec:introduction}
 \begin{itemize}
     \item Briefly introduce the problem you are addressing in your project.
     \item Provide some context about why this problem is important.
@@ -38,7 +75,6 @@
 \end{itemize}
 
 \section{Related Work}
-\label{sec:related_work}
 \begin{itemize}
     \item Discuss previous work that has been done on this problem.
     \item Compare and contrast your approach with these previous methods.
@@ -46,7 +82,6 @@
 \end{itemize}
 
 \section{Problem Definition and AI Techniques}
-\label{sec:problem_definition_and_ai_techniques}
 \begin{itemize}
     \item Clearly define the problem you are addressing.
     \item Describe the AI techniques you used in your project.
@@ -54,7 +89,6 @@
 \end{itemize}
 
 \section{Dataset Description}
-\label{sec:dataset_description}
 \begin{itemize}
     \item Describe the dataset you used in your project.
     \item Discuss any relevant characteristics of the data.
@@ -63,7 +97,6 @@
 \end{itemize}
 
 \section{Experimental Design}
-\label{sec:experimental_design}
 \begin{itemize}
     \item Describe the design of your experiment.
     \item Discuss any preprocessing steps you took, such as cleaning the data
@@ -76,7 +109,6 @@
 \end{itemize}
 
 \section{Results and Discussion}
-\label{sec:results_and_discussion}
 \begin{itemize}
     \item Present the results of your experiments, including any relevant
           figures
@@ -86,7 +118,6 @@
 \end{itemize}
 
 \section{Conclusion and Future Work}
-\label{sec:conclusion_and_future_work}
 \begin{itemize}
     \item Summarise the main findings of your project.
     \item Conclude the report by discussing the significance of your findings.
@@ -96,20 +127,17 @@
 \end{itemize}
 
 \section{Contributions}
-\label{sec:contributions}
 \begin{itemize}
     \item List each team member.
     \item Describe the contributions of each team member to the project.
 \end{itemize}
 
 \section{References}
-\label{sec:references}
 \begin{itemize}
     \item Include any references you cited in your report.
 \end{itemize}
 
 \section{Appendix}
-\label{sec:appendix}
 \begin{itemize}
     \item Include any additional information or material that supports your
           report.
