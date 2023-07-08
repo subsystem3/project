@@ -1,0 +1,53 @@
+name: Release
+
+on:
+  pull_request:
+    branches: [main]
+    types: [closed]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  packages: write
+  pull-requests: read
+
+jobs:
+  release:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v3.5.3
+        with:
+          ref: main
+          fetch-depth: '0'
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v2.1.1
+        with:
+          name: documents
+
+      - name: Get Version
+        run: echo "version=$(cat release.txt)" >> $GITHUB_ENV
+
+      - name: Print Version
+        run: echo "Version is ${{ env.version }}"
+
+      - name: Release
+        uses: softprops/action-gh-release@v0.1.15
+        with:
+          tag_name: ${{ env.version }}
+          files: |
+            Project-Proposal-Team-2.pdf
+            Final-Project-Report-Team-2.pdf
+            Final-Project-Team-2.mp4
+          body: |
+            DELIVERABLES:
+              - [Project-Proposal-Team-2.pdf](https://github.com/team2-su23-aai501/project/releases/download/${{ env.version }}/Project-Proposal-Team-2.pdf)
+              - [Final-Project-Report-Team-2.pdf](https://github.com/team2-su23-aai501/project/releases/download/${{ env.version }}/Final-Project-Report-Team-2.pdf)
+              - [Final-Project-Report-Team-2.mp4](https://github.com/team2-su23-aai501/project/releases/download/${{ env.version }}/Final-Project-Team-2.mp4)
+          draft: false
+          prerelease: true
