@@ -1,0 +1,42 @@
+{
+    "name": "project",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "onCreateCommand": "./.devcontainer/oncreate.sh",
+    "waitFor": "onCreateCommand",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "analytic-signal.preview-pdf",
+                "DavidAnson.vscode-markdownlint",
+                "EditorConfig.EditorConfig",
+                "GitHub.copilot-chat@0.3.2023070701",
+                "GitHub.copilot-labs",
+                "GitHub.vscode-github-actions",
+                "janisdd.vscode-edit-csv",
+                "mechatroner.rainbow-csv",
+                "ms-azuretools.vscode-docker",
+                "ms-python.autopep8",
+                "ms-python.isort",
+                "ms-python.python",
+                "ms-toolsai.jupyter",
+                "mutantdino.resourcemonitor"
+            ],
+            "settings": {
+                "editor.tabSize": 4,
+                "editor.insertSpaces": true,
+                "editor.detectIndentation": false,
+                "[python]": {
+                    "editor.codeActionsOnSave": {
+                        "source.organizeImports": true
+                    },
+                    "editor.formatOnSave": true,
+                    "python.defaultInterpreterPath": "/opt/conda/bin/python",
+                    "python.autoselectInterpreter": true,
+                    "python.formatting.provider": "autopep8"
+                }
+            }
+        }
+    }
+}
