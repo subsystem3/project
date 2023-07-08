@@ -23,7 +23,7 @@
 \setstretch{1.15}
 \definecolor{blue}{RGB}{0,62,126}
 
-\renewcommand{\titlepage}[2]{
+\newcommand{\mytitlepage}[2]{
     \thispagestyle{empty}
 
     \begin{tikzpicture}[remember picture, overlay]
@@ -48,7 +48,7 @@
 }
 
 {
-    \titlepage{\includegraphics[width=\paperwidth]{images/background.pdf}}
+    \mytitlepage{\includegraphics[width=\paperwidth]{images/background.pdf}}
     {
         \centering\fontfamily{phv}\selectfont
         {\Huge \bfseries Project Proposal \par}
