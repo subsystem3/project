@@ -1,0 +1,3 @@
+👋 Welcome to Codespaces!
+
+🛠️  The environment is pre-configured with common AI technologies.
