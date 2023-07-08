@@ -1,18 +1,69 @@
 \documentclass{article}
-\usepackage[utf8]{inputenc}
-\usepackage{pdfpages}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{float}
 \usepackage{graphicx}
 \usepackage{hyperref}
-
-\title{AI Team Project Proposal}
-\author{Team Name}
-\date{Due Date}
-
+\usepackage{lipsum}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{natbib}
+\usepackage{pdfpages}
+\usepackage{setspace}
+\usepackage{subcaption}
+\usepackage{tabularx}
+\usepackage{tikz}
+\usepackage[utf8]{inputenc}
 \begin{document}
 
-\includepdf[pages={1}]{cover-proposal.pdf}
+\setstretch{1.15}
+\definecolor{blue}{RGB}{0,62,126}
 
-\maketitle
+\renewcommand{\titlepage}[2]{
+    \thispagestyle{empty}
+
+    \begin{tikzpicture}[remember picture, overlay]
+        \node [inner sep=0pt] at (current page.center) {#1};
+        {
+        \node [
+            anchor=center,
+            inner sep=1.25cm,
+            rectangle,
+            fill=blue!70!white,
+            fill opacity=0,
+            text opacity=1,
+            minimum height=0.2\paperheight,
+            minimum width=\paperwidth,
+            text width=0.8\paperwidth,
+            font=\fontfamily{pnc}\selectfont
+        ] at (current page.center) {#2};
+        }
+    \end{tikzpicture}
+
+    \newpage
+}
+
+{
+    \titlepage{\includegraphics[width=\paperwidth]{images/background.pdf}}
+    {
+        \centering\fontfamily{phv}\selectfont
+        {\Huge \bfseries Project Proposal \par}
+        \vspace{8pt}
+        {\begin{center}
+                \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}c c c}
+                    {\LARGE Jonathan Agustin} &
+                    {\LARGE Fernando Calderon} &
+                    {\LARGE Juliet Lawton}
+                \end{tabular*}
+            \end{center}}
+        \vspace{24pt}
+        {\LARGE\bfseries \par}
+    }
+}
 
 \section{Introduction}
 

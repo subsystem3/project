@@ -1,0 +1,63 @@
+name: Release
+
+on:
+  pull_request:
+    branches: [main]
+    types: [closed]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  packages: write
+  pull-requests: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out dev branch
+        uses: actions/checkout@v3.5.3
+        with:
+          ref: dev
+          fetch-depth: '0'
+
+      - name: Delete old PDFs
+        run: |
+          rm -f Final-Project-Report-Team-2.pdf
+          rm -f Project-Proposal-Team-2.pdf
+
+      - name: Generate Project Report PDF
+        uses: docker://blang/latex:ubuntu
+        with:
+          entrypoint: pdflatex
+          args: Final-Project-Report-Team-2.tex
+
+      - name: Generate Project Proposal PDF
+        uses: docker://blang/latex:ubuntu
+        with:
+          entrypoint: pdflatex
+          args: Project-Proposal-Team-2.tex
+
+      - name: Get Version
+        run: |
+          echo "version=$(cat release.txt)" >> $GITHUB_ENV
+          echo "Release Version: ${{ env.version }}"
+
+      - name: Release
+        uses: softprops/action-gh-release@v0.1.15
+        with:
+          tag_name: ${{ env.version }}
+          files: |
+            Project-Proposal-Team-2.pdf
+            Final-Project-Report-Team-2.pdf
+            Final-Project-Team-2.mp4
+          body: |
+            DELIVERABLES:
+              - [Project-Proposal-Team-2.pdf](https://github.com/team2-su23-aai501/project/releases/download/${{ env.version }}/Project-Proposal-Team-2.pdf)
+              - [Final-Project-Report-Team-2.pdf](https://github.com/team2-su23-aai501/project/releases/download/${{ env.version }}/Final-Project-Report-Team-2.pdf)
+              - [Final-Project-Report-Team-2.mp4](https://github.com/team2-su23-aai501/project/releases/download/${{ env.version }}/Final-Project-Team-2.mp4)
+          draft: false
+          prerelease: true

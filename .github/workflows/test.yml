@@ -1,0 +1,41 @@
+name: Test
+
+on:
+  push:
+    branches: [dev]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  packages: write
+  pull-requests: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out dev branch
+        uses: actions/checkout@v3.5.3
+        with:
+          ref: dev
+          fetch-depth: '0'
+
+      - name: Delete old PDFs
+        run: |
+          rm -f Final-Project-Report-Team-2.pdf
+          rm -f Project-Proposal-Team-2.pdf
+
+      - name: Generate Project Report PDF
+        uses: docker://blang/latex:ubuntu
+        with:
+          entrypoint: pdflatex
+          args: Final-Project-Report-Team-2.tex
+
+      - name: Generate Project Proposal PDF
+        uses: docker://blang/latex:ubuntu
+        with:
+          entrypoint: pdflatex
+          args: Project-Proposal-Team-2.tex
