@@ -27,9 +27,10 @@ jobs:
 
       - name: Generate PDFs
         run: |
-          rm -f Final-Project-Report-Team-2.pdf
+          # must generate twice
           pdflatex Final-Project-Report-Team-2.tex
-          rm -f Project-Proposal-Team-2.pdf
+          pdflatex Final-Project-Report-Team-2.tex
+          pdflatex Project-Proposal-Team-2.tex
           pdflatex Project-Proposal-Team-2.tex
 
       - name: Get Version
