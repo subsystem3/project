@@ -17,8 +17,6 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/${{ github.repository }}/build:latest
     steps:
       - name: Check out dev branch
         uses: actions/checkout@v3.5.3
@@ -26,46 +24,27 @@ jobs:
           ref: dev
           fetch-depth: '0'
 
-      - name: Set up Python
-        uses: actions/setup-python@v4.6.1
-        with:
-          python-version: "3.11.3"
+      - name: Delete old PDFs
+        run: |
+          rm -f Final-Project-Report-Team-2.pdf
+          rm -f Project-Proposal-Team-2.pdf
 
       - name: Generate Project Report PDF
-        run: |
-          rm Final-Project-Report-Team-2.pdf
-          pdflatex Final-Project-Report-Team-2.tex
-
-          rm Project-Proposal-Team-2.pdf
-          pdflatex Project-Proposal-Team-2.tex
-
-      - name: Upload Project Report PDFs
-        uses: actions/upload-artifact@v3.1.2
+        uses: docker://blang/latex:ubuntu
         with:
-          name: documents
-          path: |
-            Final-Project-Report-Team-2.pdf
-            Project-Proposal-Team-2.pdf
-  release:
-    if: github.event.pull_request.merged == true
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout main branch
-        uses: actions/checkout@v3.5.3
-        with:
-          ref: main
-          fetch-depth: '0'
+          entrypoint: pdflatex
+          args: Final-Project-Report-Team-2.tex
 
-      - name: Download artifacts
-        uses: actions/download-artifact@v2.1.1
+      - name: Generate Project Proposal PDF
+        uses: docker://blang/latex:ubuntu
         with:
-          name: documents
+          entrypoint: pdflatex
+          args: Project-Proposal-Team-2.tex
 
       - name: Get Version
-        run: echo "version=$(cat release.txt)" >> $GITHUB_ENV
-
-      - name: Print Version
-        run: echo "Version is ${{ env.version }}"
+        run: |
+          echo "version=$(cat release.txt)" >> $GITHUB_ENV
+          echo "Release Version: ${{ env.version }}"
 
       - name: Release
         uses: softprops/action-gh-release@v0.1.15
