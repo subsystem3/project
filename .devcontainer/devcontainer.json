@@ -1,7 +1,7 @@
 {
     "name": "project",
     "build": {
-        "dockerfile": "Dockerfile"
+        "dockerfile": "../Dockerfile"
     },
     "onCreateCommand": "./.devcontainer/oncreate.sh",
     "waitFor": "onCreateCommand",
@@ -32,7 +32,6 @@
                         "source.organizeImports": true
                     },
                     "editor.formatOnSave": true,
-                    "python.defaultInterpreterPath": "/opt/conda/bin/python",
                     "python.autoselectInterpreter": true,
                     "python.formatting.provider": "autopep8"
                 }
