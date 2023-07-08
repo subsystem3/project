@@ -28,13 +28,13 @@ jobs:
           rm -f Project-Proposal-Team-2.pdf
 
       - name: Generate Project Report PDF
-        uses: docker://pandoc/latex
+        uses: docker://aergus/latex
         with:
           entrypoint: pdflatex
           args: Final-Project-Report-Team-2.tex
 
       - name: Generate Project Proposal PDF
-        uses: docker://pandoc/latex
+        uses: docker://aergus/latex
         with:
           entrypoint: pdflatex
           args: Project-Proposal-Team-2.tex
