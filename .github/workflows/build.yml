@@ -52,7 +52,9 @@ jobs:
       with:
         context: .
         push: true
-        tags: ghcr.io/${{ github.repository }}/build:${{ github.sha }}
+        tags: |
+          ghcr.io/${{ github.repository }}/build:${{ github.sha }}
+          ${{ github.event_name == 'pull_request' && github.event.action == 'closed' && 'ghcr.io/${{ github.repository }}/build:latest' }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
 

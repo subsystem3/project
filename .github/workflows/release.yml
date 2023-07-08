@@ -15,6 +15,37 @@ permissions:
   pull-requests: read
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/${{ github.repository }}/build:latest
+    steps:
+      - name: Check out dev branch
+        uses: actions/checkout@v3.5.3
+        with:
+          ref: dev
+          fetch-depth: '0'
+
+      - name: Set up Python
+        uses: actions/setup-python@v4.6.1
+        with:
+          python-version: "3.11.3"
+
+      - name: Generate Project Report PDF
+        run: |
+          rm Final-Project-Report-Team-2.pdf
+          pdflatex Final-Project-Report-Team-2.tex
+
+          rm Project-Proposal-Team-2.pdf
+          pdflatex Project-Proposal-Team-2.tex
+
+      - name: Upload Project Report PDFs
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          name: documents
+          path: |
+            Final-Project-Report-Team-2.pdf
+            Project-Proposal-Team-2.pdf
   release:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
