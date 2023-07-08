@@ -87,9 +87,10 @@ jobs:
 
   release:
     needs: build
-    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true && github.ref == 'refs/heads/main'
+    if: github.event.pull_request.merged == true && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
+
       - name: Checkout main branch
         uses: actions/checkout@v3.5.3
         with:
@@ -103,6 +104,9 @@ jobs:
 
       - name: Get Version
         run: echo "version=$(cat release.txt)" >> $GITHUB_ENV
+
+      - name: Print Version
+        run: echo "Version is ${{ env.version }}"
 
       - name: Release
         uses: softprops/action-gh-release@v0.1.15
