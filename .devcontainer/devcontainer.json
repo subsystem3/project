@@ -1,7 +1,8 @@
 {
     "name": "project",
     "build": {
-        "dockerfile": "../Dockerfile"
+        "context": "..",
+        "dockerfile": "Dockerfile"
     },
     "onCreateCommand": "./.devcontainer/oncreate.sh",
     "waitFor": "onCreateCommand",
@@ -11,8 +12,6 @@
                 "analytic-signal.preview-pdf",
                 "DavidAnson.vscode-markdownlint",
                 "EditorConfig.EditorConfig",
-                "GitHub.copilot-chat@0.3.2023070701",
-                "GitHub.copilot-labs",
                 "GitHub.vscode-github-actions",
                 "janisdd.vscode-edit-csv",
                 "mechatroner.rainbow-csv",
@@ -21,6 +20,7 @@
                 "ms-python.isort",
                 "ms-python.python",
                 "ms-toolsai.jupyter",
+                "ms-vsliveshare.vsliveshare",
                 "mutantdino.resourcemonitor"
             ],
             "settings": {
@@ -32,10 +32,12 @@
                         "source.organizeImports": true
                     },
                     "editor.formatOnSave": true,
+                    "python.defaultInterpreterPath": "/opt/conda/bin/python",
                     "python.autoselectInterpreter": true,
                     "python.formatting.provider": "autopep8"
                 }
             }
         }
-    }
+    },
+    "remoteUser": "root"
 }

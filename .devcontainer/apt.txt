@@ -1,0 +1,7 @@
+chktex
+libreoffice
+libreoffice-script-provider-python
+pandoc
+pdftk
+texlive-full
+unoconv
