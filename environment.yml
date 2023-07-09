@@ -1,0 +1,11 @@
+name: venv
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - jupyterlab
+  - keras
+  - plotly
+  - seaborn
+  - statsmodels
+  - tensorflow
