@@ -1,0 +1,4 @@
+chktex
+pandoc
+pdftk
+texlive-full
