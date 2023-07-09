@@ -42,13 +42,15 @@
             font=\fontfamily{pnc}\selectfont
         ] at (current page.center) {#2};
         }
+        \node [anchor=south east, outer sep=3pt] at (current page.south east)
+        {\includegraphics[width=0.33\paperwidth]{images/logo.png}};
     \end{tikzpicture}
 
     \newpage
 }
 
 {
-    \mytitlepage{\includegraphics[width=\paperwidth]{images/background.pdf}}
+    \mytitlepage{\includegraphics[width=\paperwidth]{images/background.png}}
     {
         \centering\fontfamily{phv}\selectfont
         {\Huge \bfseries Project Proposal \par}
