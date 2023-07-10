@@ -2,8 +2,8 @@ chktex
 ffmpeg
 libreoffice
 pandoc
-pdftk
 poppler-utils
+texlive-base
 texlive-fonts-extra
 texlive-fonts-recommended
 texlive-latex-base
