@@ -13,7 +13,37 @@ permissions:
   packages: read
 
 jobs:
-  build:
+  build-pdfs:
+    runs-on: ubuntu-latest
+    container:
+      image: texlive/texlive:latest
+    steps:
+      - name: Check out dev branch
+        uses: actions/checkout@v3.5.3
+        with:
+          ref: dev
+          fetch-depth: '0'
+
+      - name: Generate PDFs
+        run: |
+          # must generate twice
+          pdflatex Final-Project-Report-Team-2.tex
+          pdflatex Final-Project-Report-Team-2.tex
+          pdflatex Project-Proposal-Team-2.tex
+          pdflatex Project-Proposal-Team-2.tex
+
+          # check if pdfs generated
+          ls -al
+
+      - name: Upload PDFs
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          name: pdfs
+          path: |
+            Final-Project-Report-Team-2.pdf
+            Project-Proposal-Team-2.pdf
+
+  build-video:
     runs-on: ubuntu-latest
     steps:
       - name: Check out dev branch
@@ -22,26 +52,31 @@ jobs:
           ref: dev
           fetch-depth: '0'
 
-      - name: Login to GitHub Container Registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-      - name: Run container
+      - name: Install Dependencies
         run: |
-          docker run -d --name build-container -v $PWD:/workspace ghcr.io/team2-su23-aai501/build-project:latest tail -f /dev/null
+          sudo apt-get update
 
-      - name: Generate Project Deliverables
+          sudo apt-get -y install \
+            ffmpeg \
+            libreoffice \
+            poppler-utils
+
+          pip install \
+            ffmpeg_python \
+            gTTS  \
+            moviepy \
+            pdf2image  \
+            python-pptx
+
+      - name: Generate Video
         run: |
-          docker exec build-container bash -c "pdflatex /workspace/Final-Project-Report-Team-2.tex"
-          docker exec build-container bash -c "pdflatex /workspace/Final-Project-Report-Team-2.tex"
-          docker exec build-container bash -c "pdflatex /workspace/Project-Proposal-Team-2.tex"
-          docker exec build-container bash -c "pdflatex /workspace/Project-Proposal-Team-2.tex"
-          docker exec build-container bash -c "python3 /workspace/pptx2video.py /workspace/Final-Project-Team-2.pptx"
+          python3 pptx2video.py Final-Project-Team-2.pptx
 
-          # check if files exist
-          docker exec build-container bash -c "ls -l /workspace/Final-Project-Report-Team-2.pdf"
-          docker exec build-container bash -c "ls -l /workspace/Project-Proposal-Team-2.pdf"
-          docker exec build-container bash -c "ls -l /workspace/Final-Project-Team-2.mp4"
+          # check if video generated
+          ls -al
 
-      - name: Logout of GitHub Container Registry
-        run: docker logout ghcr.io
-        if: always()
+      - name: Upload Video
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          name: video
+          path: Final-Project-Team-2.mp4
