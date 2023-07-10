@@ -26,25 +26,23 @@ jobs:
 
       - name: Generate PDFs
         run: |
-          # must generate twice
-          pdflatex Final-Project-Report-Team-2.tex
-          pdflatex Final-Project-Report-Team-2.tex
-          pdflatex Project-Proposal-Team-2.tex
-          pdflatex Project-Proposal-Team-2.tex
+          # generate twice to get past title page bug
+          pdflatex ${{ vars.REPORT }}.tex
+          pdflatex ${{ vars.REPORT }}.tex
+          pdflatex ${{ vars.PROPOSAL }}.tex
+          pdflatex ${{ vars.PROPOSAL }}.tex
 
-          # check if pdfs generated
-          ls -al
-
-      - name: Upload PDFs
+      - name: Upload PDF Artifacts
         uses: actions/upload-artifact@v3.1.2
         with:
           name: pdfs
           path: |
-            Final-Project-Report-Team-2.pdf
-            Project-Proposal-Team-2.pdf
+            ${{ vars.REPORT }}.pdf
+            ${{ vars.PROPOSAL }}.pdf
 
   build-video:
     runs-on: ubuntu-latest
+    environment: pull_request
     steps:
       - name: Check out dev branch
         uses: actions/checkout@v3.5.3
@@ -53,38 +51,55 @@ jobs:
           fetch-depth: '0'
 
       - name: Cache pip packages
-        uses: actions/cache@v1.2.1
+        uses: actions/cache@v3.3.1
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: Install Dependencies
-        run: |
-          sudo apt-get update
+      - name: Cache apt packages
+        uses: actions/cache@v3.3.1
+        with:
+          path: /var/cache/apt/archives
+          key: ${{ runner.os }}-apt-${{ hashFiles('/etc/apt/sources.list') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-
 
+      - name: Generate Video
+        run: |
+          # install dependencies
+          sudo apt-get update
           sudo apt-get -y install \
             ffmpeg \
             libreoffice \
-            poppler-utils
+            poppler-utils \
+            bc
 
-          pip install \
-            ffmpeg_python \
+          python3 -m pip install --upgrade pip
+          python3 -m pip install \
             gTTS  \
             moviepy \
             pdf2image  \
             python-pptx
 
-      - name: Generate Video
-        run: |
-          python3 pptx2video.py Final-Project-Team-2.pptx
+          # generate video
+          python3 pptx2video.py ${{ vars.PROJECT }}.pptx
 
-          # check if video generated
-          ls -al
-
-      - name: Upload Video
+      - name: Upload Video Artifact
         uses: actions/upload-artifact@v3.1.2
         with:
           name: video
-          path: Final-Project-Team-2.mp4
+          path: ${{ vars.PROJECT }}.mp4
+
+      - name: Upload to Vimeo via Python API
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install PyVimeo
+          python3 upload_video.py
+        env:
+          VIMEO_CLIENT_ID: ${{ secrets.VIMEO_CLIENT_ID }}
+          VIMEO_CLIENT_SECRET: ${{ secrets.VIMEO_CLIENT_SECRET }}
+          VIMEO_ACCESS_TOKEN: ${{ secrets.VIMEO_ACCESS_TOKEN }}
+          VIMEO_VIDEO_ID: ${{ secrets.VIMEO_VIDEO_ID }}
+          VIDEO_PATH: ${{ vars.PROJECT }}.mp4
