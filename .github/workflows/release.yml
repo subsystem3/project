@@ -16,8 +16,6 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/team2-su23-aai501/build-project:latest
     steps:
       - name: Check out dev branch
         uses: actions/checkout@v3.5.3
@@ -25,23 +23,22 @@ jobs:
           ref: dev
           fetch-depth: '0'
 
-      - name: Install Python Packages
+      - name: Run container
         run: |
-          pip install -r .devcontainer/requirements.txt
-          pip list
+          docker run -d --name build-container -v $PWD:/workspace ghcr.io/team2-su23-aai501/build-project:latest
 
-      - name: Generate PDFs
+      - name: Generate Project Deliverables
         run: |
-          # must generate twice
-          pdflatex Final-Project-Report-Team-2.tex
-          pdflatex Final-Project-Report-Team-2.tex
-          pdflatex Project-Proposal-Team-2.tex
-          pdflatex Project-Proposal-Team-2.tex
+          docker exec build-container bash -c "pdflatex /workspace/Final-Project-Report-Team-2.tex"
+          docker exec build-container bash -c "pdflatex /workspace/Final-Project-Report-Team-2.tex"
+          docker exec build-container bash -c "pdflatex /workspace/Project-Proposal-Team-2.tex"
+          docker exec build-container bash -c "pdflatex /workspace/Project-Proposal-Team-2.tex"
+          docker exec build-container bash -c "python3 /workspace/pptx2video.py /workspace/Final-Project-Team-2.pptx"
 
-      - name: Generate Video
-        run: |
-          python3 pptx2video.py Final-Project-Team-2.pptx
-          ls -l Final-Project-Team-2.mp4
+          # check if files exist
+          docker exec build-container bash -c "ls -l /workspace/Final-Project-Report-Team-2.pdf"
+          docker exec build-container bash -c "ls -l /workspace/Project-Proposal-Team-2.pdf"
+          docker exec build-container bash -c "ls -l /workspace/Final-Project-Team-2.mp4"
 
       - name: Get Version
         run: |
