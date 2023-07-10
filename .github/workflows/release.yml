@@ -63,3 +63,7 @@ jobs:
               - [Final-Project-Team-2.mp4](https://github.com/team2-su23-aai501/project/releases/download/${{ env.version }}/Final-Project-Team-2.mp4)
           draft: false
           prerelease: true
+
+      - name: Logout of GitHub Container Registry
+        run: docker logout ghcr.io
+        if: always()
