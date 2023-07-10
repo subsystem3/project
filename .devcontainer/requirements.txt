@@ -1,6 +1,6 @@
 ffmpeg_python==0.2.0
 ffmpeg==1.4
-gtts==2.3.2
+gTTS==2.3.2
 jupyter==1.0.0
 jupyterlab==4.0.2
 keras==2.13.1
