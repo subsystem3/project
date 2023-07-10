@@ -28,21 +28,18 @@
         - name: Generate PDFs
           run: |
             # must generate twice
-            pdflatex Final-Project-Report-Team-2.tex
-            pdflatex Final-Project-Report-Team-2.tex
-            pdflatex Project-Proposal-Team-2.tex
-            pdflatex Project-Proposal-Team-2.tex
-
-            # check if pdfs generated
-            ls -al
+            pdflatex ${{ secrets.REPORT }}.tex
+            pdflatex ${{ secrets.REPORT }}.tex
+            pdflatex ${{ secrets.PROPOSAL }}.tex
+            pdflatex ${{ secrets.PROPOSAL }}.tex
 
         - name: Upload PDFs
           uses: actions/upload-artifact@v3.1.2
           with:
             name: pdfs
             path: |
-              Final-Project-Report-Team-2.pdf
-              Project-Proposal-Team-2.pdf
+              ${{ secrets.REPORT }}.pdf
+              ${{ secrets.PROPOSAL }}.pdf
 
     build-video:
       runs-on: ubuntu-latest
@@ -54,106 +51,112 @@
             fetch-depth: '0'
 
         - name: Cache pip packages
-          uses: actions/cache@v1.2.1
+          uses: actions/cache@v3.3.1
           with:
             path: ~/.cache/pip
             key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
             restore-keys: |
               ${{ runner.os }}-pip-
 
-        - name: Install Dependencies
-          run: |
-            sudo apt-get update
+        - name: Cache apt packages
+          uses: actions/cache@v3.3.1
+          with:
+            path: /var/cache/apt/archives
+            key: ${{ runner.os }}-apt-${{ hashFiles('/etc/apt/sources.list') }}
+            restore-keys: |
+              ${{ runner.os }}-apt-
 
+        - name: Generate Video
+          run: |
+            # install dependencies
+            sudo apt-get update
             sudo apt-get -y install \
               ffmpeg \
               libreoffice \
               poppler-utils \
               bc
 
-            pip install \
+            python3 -m pip install --upgrade pip
+            python3 -m pip install \
               gTTS  \
               moviepy \
               pdf2image  \
               python-pptx
 
-        - name: Generate Video
-          run: |
-            python3 pptx2video.py Final-Project-Team-2.pptx
-
-            # check if video generated
-            ls -al
+            # generate video
+            python3 pptx2video.py ${{ secrets.PROJECT }}.pptx
 
             # get total video duration
-            total_seconds=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 Final-Project-Team-2.mp4)
+            total_seconds=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ${{ secrets.PROJECT }}.mp4)
             hours=$(bc <<< "${total_seconds}/3600")
             minutes=$(bc <<< "(${total_seconds}%3600)/60")
-            seconds=$(printf "%.0f" $(bc <<< "${total_seconds}%60")) # round seconds to nearest whole number
-            total_duration="${hours}h ${minutes}m ${seconds}s"
-            echo $total_duration > total_duration.txt
+            seconds=$(printf "%.0f" $(bc <<< "${total_seconds}%60"))
+            humanized_duration="${hours}h ${minutes}m ${seconds}s"
+            echo "duration=$humanized_duration" >> "$GITHUB_OUTPUT"
 
         - name: Upload Video
           uses: actions/upload-artifact@v3.1.2
           with:
             name: video
-            path: Final-Project-Team-2.mp4
-
-        - name: Upload Duration
-          uses: actions/upload-artifact@v3.1.2
-          with:
-            name: duration
-            path: total_duration.txt
+            path: ${{ secrets.PROJECT }}.mp4
 
     release:
+      if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
       needs: [build-pdfs, build-video]
       runs-on: ubuntu-latest
+      environment: production
       steps:
         - name: Check out main branch
           uses: actions/checkout@v3.5.3
           with:
-            ref: main
+            ref: ${{ github.event.pull_request.merge_commit_sha }}
             fetch-depth: '0'
-
-        - name: Download PDF Artifacts
-          uses: actions/download-artifact@v3.0.2
-          with:
-            name: pdfs
 
         - name: Download Video Artifacts
           uses: actions/download-artifact@v3.0.2
           with:
             name: video
 
-        - name: Get Version
+        - name: Upload to Vimeo via Python API
           run: |
-            echo "version=$(cat release.txt)" >> $GITHUB_ENV
-            echo "Release Version: ${{ env.version }}"
+            python3 -m pip install --upgrade pip
+            pip install PyVimeo
+            python3 upload_video.py
+          env:
+            VIMEO_CLIENT_ID: ${{ secrets.VIMEO_CLIENT_ID }}
+            VIMEO_CLIENT_SECRET: ${{ secrets.VIMEO_CLIENT_SECRET }}
+            VIMEO_ACCESS_TOKEN: ${{ secrets.VIMEO_ACCESS_TOKEN }}
+            VIMEO_VIDEO_ID: ${{ secrets.VIMEO_VIDEO_ID }}
+            VIDEO_PATH: ${{ secrets.PROJECT }}.mp4
 
-        - name: Download Video Duration
+        - name: Download PDF Artifacts
           uses: actions/download-artifact@v3.0.2
           with:
-            name: duration
+            name: pdfs
 
-        - name: Get Video Duration
-          run: |
-            total_duration=$(cat total_duration.txt)
-            echo "total_duration=$total_duration" >> $GITHUB_ENV
+        - name: Bump version and push tag
+          id: tag_version
+          uses: anothrNick/github-tag-action@1.67.0
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            WITH_V: true
+            PRERELEASE: true
 
         - name: Release
           uses: softprops/action-gh-release@v0.1.15
           with:
-            tag_name: ${{ env.version }}
+            tag_name: ${{ steps.tag_version.outputs.new_tag }}
             files: |
-              Project-Proposal-Team-2.pdf
-              Final-Project-Report-Team-2.pdf
-              Final-Project-Team-2.mp4
+              ${{ secrets.PROPOSAL }}.pdf
+              ${{ secrets.REPORT }}.pdf
+              ${{ secrets.PROJECT }}.mp4
             body: |
               DELIVERABLES:
-                - [Project-Proposal-Team-2.pdf](https://github.com/team2-su23-aai501/project/releases/download/${{ env.version }}/Project-Proposal-Team-2.pdf)
-                - [Final-Project-Report-Team-2.pdf](https://github.com/team2-su23-aai501/project/releases/download/${{ env.version }}/Final-Project-Report-Team-2.pdf)
-                - [Final-Project-Team-2.mp4](https://github.com/team2-su23-aai501/project/releases/download/${{ env.version }}/Final-Project-Team-2.mp4)
+                - [${{ secrets.PROPOSAL }}.pdf](${{secrets.DOWNLOAD_URI}}/${{ steps.tag_version.outputs.new_tag }}/${{ secrets.PROPOSAL }}.pdf)
+                - [${{ secrets.REPORT }}.pdf](${{secrets.DOWNLOAD_URI}}/${{ steps.tag_version.outputs.new_tag }}/${{ secrets.REPORT }}.pdf)
+                - [${{ secrets.PROJECT }}.mp4](${{secrets.DOWNLOAD_URI}}/${{ steps.tag_version.outputs.new_tag }}/${{ secrets.PROJECT }}.mp4)
 
-              VIDEO DURATION: ${{ env.total_duration }}
+              VIDEO DURATION: ${{ needs.build-video.outputs.duration }}
             draft: false
             prerelease: true
 

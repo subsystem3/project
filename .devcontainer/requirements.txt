@@ -6,6 +6,7 @@ pandas==2.0.2
 pdf2image==1.16.3
 plotly==5.15.0
 python-pptx==0.6.21
+PyVimeo==1.1.0
 seaborn==0.12.2
 tensorflow==2.13.0
 tqdm==4.64.1
