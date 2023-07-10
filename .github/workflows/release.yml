@@ -89,7 +89,7 @@
             total_seconds=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 Final-Project-Team-2.mp4)
             hours=$(bc <<< "${total_seconds}/3600")
             minutes=$(bc <<< "(${total_seconds}%3600)/60")
-            seconds=$(bc <<< "${total_seconds}%60")
+            seconds=$(printf "%.0f" $(bc <<< "${total_seconds}%60")) # round seconds to nearest whole number
             total_duration="${hours}h ${minutes}m ${seconds}s"
             echo $total_duration > total_duration.txt
 
