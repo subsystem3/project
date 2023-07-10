@@ -68,7 +68,8 @@
             sudo apt-get -y install \
               ffmpeg \
               libreoffice \
-              poppler-utils
+              poppler-utils \
+              bc
 
             pip install \
               ffmpeg_python \
@@ -84,11 +85,25 @@
             # check if video generated
             ls -al
 
+            # get total video duration
+            total_seconds=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 Final-Project-Team-2.mp4)
+            hours=$(bc <<< "${total_seconds}/3600")
+            minutes=$(bc <<< "(${total_seconds}%3600)/60")
+            seconds=$(bc <<< "${total_seconds}%60")
+            total_duration="${hours}h ${minutes}m ${seconds}s"
+            echo $total_duration > total_duration.txt
+
         - name: Upload Video
           uses: actions/upload-artifact@v3.1.2
           with:
             name: video
             path: Final-Project-Team-2.mp4
+
+        - name: Upload Duration
+          uses: actions/upload-artifact@v3.1.2
+          with:
+            name: duration
+            path: total_duration.txt
 
     release:
       needs: [build-pdfs, build-video]
@@ -100,12 +115,12 @@
             ref: main
             fetch-depth: '0'
 
-        - name: Retrieve PDF Artifacts
+        - name: Download PDF Artifacts
           uses: actions/download-artifact@v3.0.2
           with:
             name: pdfs
 
-        - name: Retrieve Video Artifacts
+        - name: Download Video Artifacts
           uses: actions/download-artifact@v3.0.2
           with:
             name: video
@@ -114,6 +129,16 @@
           run: |
             echo "version=$(cat release.txt)" >> $GITHUB_ENV
             echo "Release Version: ${{ env.version }}"
+
+        - name: Download Video Duration
+          uses: actions/download-artifact@v3.0.2
+          with:
+            name: duration
+
+        - name: Get Video Duration
+          run: |
+            total_duration=$(cat total_duration.txt)
+            echo "total_duration=$total_duration" >> $GITHUB_ENV
 
         - name: Release
           uses: softprops/action-gh-release@v0.1.15
@@ -128,6 +153,8 @@
                 - [Project-Proposal-Team-2.pdf](https://github.com/team2-su23-aai501/project/releases/download/${{ env.version }}/Project-Proposal-Team-2.pdf)
                 - [Final-Project-Report-Team-2.pdf](https://github.com/team2-su23-aai501/project/releases/download/${{ env.version }}/Final-Project-Report-Team-2.pdf)
                 - [Final-Project-Team-2.mp4](https://github.com/team2-su23-aai501/project/releases/download/${{ env.version }}/Final-Project-Team-2.mp4)
+
+              VIDEO DURATION: ${{ env.total_duration }}
             draft: false
             prerelease: true
 
