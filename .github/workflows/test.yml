@@ -62,7 +62,6 @@ jobs:
             poppler-utils
 
           pip install \
-            ffmpeg_python \
             gTTS  \
             moviepy \
             pdf2image  \
