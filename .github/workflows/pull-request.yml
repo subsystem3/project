@@ -41,3 +41,7 @@ jobs:
           docker exec build-container bash -c "ls -l /workspace/Final-Project-Report-Team-2.pdf"
           docker exec build-container bash -c "ls -l /workspace/Project-Proposal-Team-2.pdf"
           docker exec build-container bash -c "ls -l /workspace/Final-Project-Team-2.mp4"
+
+      - name: Logout of GitHub Container Registry
+        run: docker logout ghcr.io
+        if: always()
