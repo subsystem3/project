@@ -24,6 +24,10 @@ jobs:
           ref: dev
           fetch-depth: '0'
 
+      - name: Print out pip list
+        run: |
+          pip list
+
       - name: Generate PDFs
         run: |
           # must generate twice

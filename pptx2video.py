@@ -24,6 +24,21 @@ class PPTXtoVideo:
             slide.notes_slide.notes_text_frame.text for slide in self.slides
         ]
 
+    def format_duration(self, duration):
+        """Formats a duration in seconds into a string in the format 'mm:ss'."""
+        minutes, seconds = divmod(int(duration), 60)
+        return f"{minutes}:{seconds:02}"
+
+    def write_metadata(self, videos):
+        """Writes metadata to a text file."""
+        total_duration = sum(video.duration for video in videos)
+        with open(self.pptx_filename.replace(".pptx", ".txt"), "w") as f:
+            f.write(f"Total duration: {self.format_duration(total_duration)}\n")
+            for i, video in enumerate(videos):
+                f.write(f"\nSlide {i+1}:\n")
+                f.write(f"Duration: {self.format_duration(video.duration)}\n")
+                f.write(f"Voiceover: {self.voiceover_texts[i]}\n")
+
     def convert_to_pdf(self):
         """Converts the .pptx file to a .pdf file using LibreOffice."""
         cmd = f"libreoffice --headless --convert-to pdf {self.pptx_filename}"
@@ -59,6 +74,7 @@ class PPTXtoVideo:
         """Converts the PowerPoint presentation to a video."""
         self.convert_to_pdf()
         videos = self.create_videos()
+        self.write_metadata(videos)
         self.combine_videos(videos)
 
 
