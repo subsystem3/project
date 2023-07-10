@@ -28,7 +28,7 @@ jobs:
 
       - name: Run container
         run: |
-          docker run -d --name build-container -v $PWD:/workspace ghcr.io/team2-su23-aai501/build-project:latest
+          docker run -d --name build-container -v $PWD:/workspace ghcr.io/team2-su23-aai501/build-project:latest tail -f /dev/null
 
       - name: Generate Project Deliverables
         run: |
