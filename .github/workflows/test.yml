@@ -86,6 +86,12 @@ jobs:
           # generate video
           python3 pptx2video.py ${{ vars.PROJECT }}.pptx
 
+      - name: Upload Video Artifact
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          name: video
+          path: ${{ vars.PROJECT }}.mp4
+
       - name: Upload to Vimeo via Python API
         run: |
           python3 -m pip install --upgrade pip
@@ -97,9 +103,3 @@ jobs:
           VIMEO_ACCESS_TOKEN: ${{ secrets.VIMEO_ACCESS_TOKEN }}
           VIMEO_VIDEO_ID: ${{ secrets.VIMEO_VIDEO_ID }}
           VIDEO_PATH: ${{ vars.PROJECT }}.mp4
-
-      - name: Upload Video Artifact
-        uses: actions/upload-artifact@v3.1.2
-        with:
-          name: video
-          path: ${{ vars.PROJECT }}.mp4
