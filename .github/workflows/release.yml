@@ -104,13 +104,11 @@
           uses: actions/download-artifact@v3.0.2
           with:
             name: pdfs
-            path: pdfs
 
         - name: Retrieve Video Artifacts
           uses: actions/download-artifact@v3.0.2
           with:
             name: video
-            path: video
 
         - name: Get Version
           run: |
