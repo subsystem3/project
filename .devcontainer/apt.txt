@@ -3,4 +3,4 @@ ffmpeg
 libreoffice
 pandoc
 poppler-utils
-texlive-full
+texlive-latex-extra

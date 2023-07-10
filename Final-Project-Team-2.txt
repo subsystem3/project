@@ -1,0 +1,37 @@
+Total duration: 2:48
+
+Slide 1:
+Duration: 0:12
+Voiceover: Welcome to our presentation titled “Attention Is All You Need”. This project was carried out by Jonathan Agustin, Fernando Calderon, and Juliet Lawton.
+
+Slide 2:
+Duration: 0:20
+Voiceover: In the introduction, we will briefly introduce the problem we are addressing in our project, provide some context about why this problem is important, state the purpose of our project, outline the goals we hope to achieve, and define the scope of our project, including any limitations.
+
+Slide 3:
+Duration: 0:15
+Voiceover: In the section on related work, we will discuss previous work that has been done on this problem, compare and contrast our approach with these previous methods, and explain why our approach is different or better.
+
+Slide 4:
+Duration: 0:16
+Voiceover: In the section on problem definition and AI techniques, we will clearly define the problem we are addressing, describe the AI techniques we used in our project, and explain why these techniques are appropriate for our problem.
+
+Slide 5:
+Duration: 0:16
+Voiceover: In the section on dataset description, we will describe the dataset we used in our project, discuss any relevant characteristics of the data, and explain how the data was collected and any preprocessing steps we took.
+
+Slide 6:
+Duration: 0:27
+Voiceover: In the section on experimental design, we will describe the design of our experiment, discuss any preprocessing steps we took, such as cleaning the data or dealing with missing values, explain any feature engineering we did, such as creating new variables or transforming existing ones, and detail the specific AI techniques we used and why we chose them.
+
+Slide 7:
+Duration: 0:17
+Voiceover: In the section on results and discussion, we will present the results of our experiments, including any relevant figures or tables, discuss the implications of our results, and explain whether our results support our initial hypothesis.
+
+Slide 8:
+Duration: 0:18
+Voiceover: In the conclusion and future work section, we will summarize the main findings of our project, conclude the report by discussing the significance of our findings, and discuss potential future work, such as how our project could be extended or improved.
+
+Slide 9:
+Duration: 0:23
+Voiceover: We would like to take a moment to express our deepest gratitude to those who have made this project possible. First and foremost, we would like to thank our professor, whose guidance and expertise have been invaluable throughout this process. Your patience and dedication have not gone unnoticed, and we are truly grateful for your support.
