@@ -9,3 +9,7 @@ dependencies:
   - seaborn
   - statsmodels
   - tensorflow
+  - python-pptx
+  - moviepy
+  - gTTS
+  - pdf2image
