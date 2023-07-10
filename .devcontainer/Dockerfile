@@ -7,8 +7,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 COPY requirements.txt apt.txt ./
 
 RUN apt-get update && \
-    apt-get upgrade -y && \
     xargs -a apt.txt apt-get install -y && \
-    rm -rf /var/lib/apt/lists/* && \
-    pip3 install --upgrade pip && \
-    pip3 install -r requirements.txt
+    apt-get clean && \
+    apt-get autoclean && \
+    rm -rf /var/lib/apt/lists/*
