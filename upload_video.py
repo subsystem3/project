@@ -7,9 +7,9 @@ client = vimeo.VimeoClient(
     secret=os.environ["VIMEO_CLIENT_SECRET"],
 )
 
-VIDEO_ID = os.environ["VIDEO_ID"]
+VIMEO_VIDEO_ID = os.environ["VIMEO_VIDEO_ID"]
 VIDEO_PATH = os.environ["VIDEO_PATH"]
-VIDEO_URI = f"https://api.vimeo.com/videos/{VIDEO_ID}"
+VIDEO_URI = f"https://api.vimeo.com/videos/{VIMEO_VIDEO_ID}"
 
 try:
     response = client.replace(VIDEO_URI, filename=VIDEO_PATH)
