@@ -68,7 +68,8 @@
             sudo apt-get -y install \
               ffmpeg \
               libreoffice \
-              poppler-utils
+              poppler-utils \
+              bc
 
             pip install \
               ffmpeg_python \
