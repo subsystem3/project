@@ -34,7 +34,9 @@ jobs:
           pdflatex Project-Proposal-Team-2.tex
 
       - name: Generate Video
-        run: python3 pptx2video.py Final-Project-Team-2.pptx
+        run: |
+          python3 pptx2video.py Final-Project-Team-2.pptx
+          ls -l Final-Project-Team-2.mp4
 
       - name: Get Version
         run: |
