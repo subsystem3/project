@@ -1,4 +1,10 @@
 chktex
+ffmpeg
+libreoffice
 pandoc
-pdftk
-texlive-full
+poppler-utils
+texlive
+texlive-latex-extra
+texlive-fonts-extra
+texlive-bibtex-extra
+texlive-science

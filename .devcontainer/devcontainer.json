@@ -6,7 +6,9 @@
     "onCreateCommand": "./.devcontainer/oncreate.sh",
     "postStartCommand": "nohup bash -c 'jupyter notebook --ip=0.0.0.0 --port=8888 --allow-root &'",
     "waitFor": "onCreateCommand",
-    "forwardPorts": [8888],
+    "forwardPorts": [
+        8888
+    ],
     "customizations": {
         "vscode": {
             "extensions": [
@@ -22,6 +24,7 @@
                 "ms-python.isort",
                 "ms-python.python",
                 "ms-toolsai.jupyter",
+                "ms-vsliveshare.vsliveshare",
                 "mutantdino.resourcemonitor"
             ],
             "settings": {
@@ -39,5 +42,6 @@
                 }
             }
         }
-    }
+    },
+    "remoteUser": "root"
 }
