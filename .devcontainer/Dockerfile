@@ -8,10 +8,6 @@ COPY requirements.txt apt.txt ./
 
 RUN apt-get update && \
     xargs -a apt.txt apt-get install -y && \
-    apt-get clean && \
-    apt-get autoclean && \
-    rm -rf /var/lib/apt/lists/* && \
-    pip install --no-cache-dir -r requirements.txt && \
-    tlmgr --no-ask install algorithm babel-english
-
-RUN rm requirements.txt apt.txt
+    pip install -r requirements.txt && \
+    tlmgr init-usertree && \
+    tlmgr install algorithm babel-english
