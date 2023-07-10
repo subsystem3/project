@@ -1,4 +1,10 @@
 chktex
+ffmpeg
+libreoffice
 pandoc
 pdftk
-texlive-full
+poppler-utils
+texlive-fonts-extra
+texlive-fonts-recommended
+texlive-latex-base
+texlive-xetex
