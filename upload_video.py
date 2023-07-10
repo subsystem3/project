@@ -7,14 +7,12 @@ client = vimeo.VimeoClient(
     secret=os.environ["VIMEO_CLIENT_SECRET"],
 )
 
-VIDEO_ID = os.environ["VIMEO_VIDEO_ID"]
+VIDEO_ID = os.environ["VIDEO_ID"]
 VIDEO_PATH = os.environ["VIDEO_PATH"]
-VIDEO_URI = f"/videos/{VIDEO_ID}"
-
+VIDEO_URI = f"https://api.vimeo.com/videos/{VIDEO_ID}"
 
 try:
-    response = client.replace(VIDEO_URI, data={"file": VIDEO_PATH})
-    response.raise_for_status()
-    print(f"Video replaced at {VIDEO_URI}")
+    response = client.replace(VIDEO_URI, filename=VIDEO_PATH)
+    print(f"Video replaced at {response}")
 except Exception as e:
     print(f"Failed to replace video: {e}")
