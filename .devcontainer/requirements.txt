@@ -1,12 +1,11 @@
-jupyter==1.0.0
+gTTS==2.3.2
 jupyterlab==4.0.2
 keras==2.13.1
-matplotlib==3.7.1
-numpy==1.23.3
+moviepy==1.0.3
 pandas==2.0.2
+pdf2image==1.16.3
 plotly==5.15.0
-scikit-learn==1.2.2
-scipy==1.10.1
+python-pptx==0.6.21
 seaborn==0.12.2
-statsmodels==0.14.0
 tensorflow==2.13.0
+tqdm==4.64.1

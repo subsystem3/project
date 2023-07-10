@@ -7,6 +7,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 COPY requirements.txt apt.txt ./
 
 RUN apt-get update && \
-    apt-get upgrade -y && \
-    xargs -a apt.txt apt-get install -y && \
+    xargs -a apt.txt apt-get install -y --no-install-recommends && \
+    pip install --no-cache-dir -r requirements.txt && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*

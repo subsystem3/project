@@ -1,55 +1,136 @@
-name: Release
+  name: Release
 
-on:
-  pull_request:
-    branches: [main]
-    types: [closed]
+  on:
+    pull_request:
+      branches: [main]
+      types: [closed]
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
 
-permissions:
-  contents: write
-  packages: read
+  permissions:
+    contents: write
+    packages: read
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/team2-su23-aai501/build-project:latest
-    steps:
-      - name: Check out dev branch
-        uses: actions/checkout@v3.5.3
-        with:
-          ref: dev
-          fetch-depth: '0'
+  jobs:
+    build-pdfs:
+      runs-on: ubuntu-latest
+      container:
+        image: texlive/texlive:latest
+      steps:
+        - name: Check out main branch
+          uses: actions/checkout@v3.5.3
+          with:
+            ref: main
+            fetch-depth: '0'
 
-      - name: Generate PDFs
-        run: |
-          # must generate twice
-          pdflatex Final-Project-Report-Team-2.tex
-          pdflatex Final-Project-Report-Team-2.tex
-          pdflatex Project-Proposal-Team-2.tex
-          pdflatex Project-Proposal-Team-2.tex
+        - name: Generate PDFs
+          run: |
+            # must generate twice
+            pdflatex Final-Project-Report-Team-2.tex
+            pdflatex Final-Project-Report-Team-2.tex
+            pdflatex Project-Proposal-Team-2.tex
+            pdflatex Project-Proposal-Team-2.tex
 
-      - name: Get Version
-        run: |
-          echo "version=$(cat release.txt)" >> $GITHUB_ENV
-          echo "Release Version: ${{ env.version }}"
+            # check if pdfs generated
+            ls -al
 
-      - name: Release
-        uses: softprops/action-gh-release@v0.1.15
-        with:
-          tag_name: ${{ env.version }}
-          files: |
-            Project-Proposal-Team-2.pdf
-            Final-Project-Report-Team-2.pdf
-            Final-Project-Team-2.mp4
-          body: |
-            DELIVERABLES:
-              - [Project-Proposal-Team-2.pdf](https://github.com/team2-su23-aai501/project/releases/download/${{ env.version }}/Project-Proposal-Team-2.pdf)
-              - [Final-Project-Report-Team-2.pdf](https://github.com/team2-su23-aai501/project/releases/download/${{ env.version }}/Final-Project-Report-Team-2.pdf)
-              - [Final-Project-Team-2.mp4](https://github.com/team2-su23-aai501/project/releases/download/${{ env.version }}/Final-Project-Team-2.mp4)
-          draft: false
-          prerelease: true
+        - name: Upload PDFs
+          uses: actions/upload-artifact@v3.1.2
+          with:
+            name: pdfs
+            path: |
+              Final-Project-Report-Team-2.pdf
+              Project-Proposal-Team-2.pdf
+
+    build-video:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Check out main branch
+          uses: actions/checkout@v3.5.3
+          with:
+            ref: main
+            fetch-depth: '0'
+
+        - name: Cache pip packages
+          uses: actions/cache@v1.2.1
+          with:
+            path: ~/.cache/pip
+            key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+            restore-keys: |
+              ${{ runner.os }}-pip-
+
+        - name: Install Dependencies
+          run: |
+            sudo apt-get update
+
+            sudo apt-get -y install \
+              ffmpeg \
+              libreoffice \
+              poppler-utils
+
+            pip install \
+              ffmpeg_python \
+              gTTS  \
+              moviepy \
+              pdf2image  \
+              python-pptx
+
+        - name: Generate Video
+          run: |
+            python3 pptx2video.py Final-Project-Team-2.pptx
+
+            # check if video generated
+            ls -al
+
+        - name: Upload Video
+          uses: actions/upload-artifact@v3.1.2
+          with:
+            name: video
+            path: Final-Project-Team-2.mp4
+
+    release:
+      needs: [build-pdfs, build-video]
+      runs-on: ubuntu-latest
+      steps:
+        - name: Check out main branch
+          uses: actions/checkout@v3.5.3
+          with:
+            ref: main
+            fetch-depth: '0'
+
+        - name: Retrieve PDF Artifacts
+          uses: actions/download-artifact@v3.0.2
+          with:
+            name: pdfs
+
+        - name: Retrieve Video Artifacts
+          uses: actions/download-artifact@v3.0.2
+          with:
+            name: video
+
+        - name: Get Version
+          run: |
+            echo "version=$(cat release.txt)" >> $GITHUB_ENV
+            echo "Release Version: ${{ env.version }}"
+
+        - name: Release
+          uses: softprops/action-gh-release@v0.1.15
+          with:
+            tag_name: ${{ env.version }}
+            files: |
+              Project-Proposal-Team-2.pdf
+              Final-Project-Report-Team-2.pdf
+              Final-Project-Team-2.mp4
+            body: |
+              DELIVERABLES:
+                - [Project-Proposal-Team-2.pdf](https://github.com/team2-su23-aai501/project/releases/download/${{ env.version }}/Project-Proposal-Team-2.pdf)
+                - [Final-Project-Report-Team-2.pdf](https://github.com/team2-su23-aai501/project/releases/download/${{ env.version }}/Final-Project-Report-Team-2.pdf)
+                - [Final-Project-Team-2.mp4](https://github.com/team2-su23-aai501/project/releases/download/${{ env.version }}/Final-Project-Team-2.mp4)
+            draft: false
+            prerelease: true
+
+        - name: Logout of GitHub Container Registry
+          run: docker logout ghcr.io
+          if: always()
