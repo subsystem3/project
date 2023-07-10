@@ -27,18 +27,18 @@ jobs:
       - name: Generate PDFs
         run: |
           # generate twice to get past title page bug
-          pdflatex ${{ secrets.REPORT }}.tex
-          pdflatex ${{ secrets.REPORT }}.tex
-          pdflatex ${{ secrets.PROPOSAL }}.tex
-          pdflatex ${{ secrets.PROPOSAL }}.tex
+          pdflatex ${{ vars.REPORT }}.tex
+          pdflatex ${{ vars.REPORT }}.tex
+          pdflatex ${{ vars.PROPOSAL }}.tex
+          pdflatex ${{ vars.PROPOSAL }}.tex
 
       - name: Upload PDF Artifacts
         uses: actions/upload-artifact@v3.1.2
         with:
           name: pdfs
           path: |
-            ${{ secrets.REPORT }}.pdf
-            ${{ secrets.PROPOSAL }}.pdf
+            ${{ vars.REPORT }}.pdf
+            ${{ vars.PROPOSAL }}.pdf
 
   build-video:
     runs-on: ubuntu-latest
@@ -84,7 +84,7 @@ jobs:
             python-pptx
 
           # generate video
-          python3 pptx2video.py ${{ secrets.PROJECT }}.pptx
+          python3 pptx2video.py ${{ vars.PROJECT }}.pptx
 
       - name: Upload to Vimeo via Python API
         run: |
@@ -96,10 +96,10 @@ jobs:
           VIMEO_CLIENT_SECRET: ${{ secrets.VIMEO_CLIENT_SECRET }}
           VIMEO_ACCESS_TOKEN: ${{ secrets.VIMEO_ACCESS_TOKEN }}
           VIMEO_VIDEO_ID: ${{ secrets.VIMEO_VIDEO_ID }}
-          VIDEO_PATH: ${{ secrets.PROJECT }}.mp4
+          VIDEO_PATH: ${{ vars.PROJECT }}.mp4
 
       - name: Upload Video Artifact
         uses: actions/upload-artifact@v3.1.2
         with:
           name: video
-          path: ${{ secrets.PROJECT }}.mp4
+          path: ${{ vars.PROJECT }}.mp4

@@ -28,21 +28,23 @@
         - name: Generate PDFs
           run: |
             # must generate twice
-            pdflatex ${{ secrets.REPORT }}.tex
-            pdflatex ${{ secrets.REPORT }}.tex
-            pdflatex ${{ secrets.PROPOSAL }}.tex
-            pdflatex ${{ secrets.PROPOSAL }}.tex
+            pdflatex ${{ vars.REPORT }}.tex
+            pdflatex ${{ vars.REPORT }}.tex
+            pdflatex ${{ vars.PROPOSAL }}.tex
+            pdflatex ${{ vars.PROPOSAL }}.tex
 
         - name: Upload PDFs
           uses: actions/upload-artifact@v3.1.2
           with:
             name: pdfs
             path: |
-              ${{ secrets.REPORT }}.pdf
-              ${{ secrets.PROPOSAL }}.pdf
+              ${{ vars.REPORT }}.pdf
+              ${{ vars.PROPOSAL }}.pdf
 
     build-video:
       runs-on: ubuntu-latest
+      outputs:
+        duration: ${{ steps.generate-video.outputs.duration }}
       steps:
         - name: Check out main branch
           uses: actions/checkout@v3.5.3
@@ -67,6 +69,7 @@
               ${{ runner.os }}-apt-
 
         - name: Generate Video
+          id: generate-video
           run: |
             # install dependencies
             sudo apt-get update
@@ -84,10 +87,10 @@
               python-pptx
 
             # generate video
-            python3 pptx2video.py ${{ secrets.PROJECT }}.pptx
+            python3 pptx2video.py ${{ vars.PROJECT }}.pptx
 
             # get total video duration
-            total_seconds=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ${{ secrets.PROJECT }}.mp4)
+            total_seconds=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ${{ vars.PROJECT }}.mp4)
             hours=$(bc <<< "${total_seconds}/3600")
             minutes=$(bc <<< "(${total_seconds}%3600)/60")
             seconds=$(printf "%.0f" $(bc <<< "${total_seconds}%60"))
@@ -98,7 +101,7 @@
           uses: actions/upload-artifact@v3.1.2
           with:
             name: video
-            path: ${{ secrets.PROJECT }}.mp4
+            path: ${{ vars.PROJECT }}.mp4
 
     release:
       if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
@@ -127,7 +130,7 @@
             VIMEO_CLIENT_SECRET: ${{ secrets.VIMEO_CLIENT_SECRET }}
             VIMEO_ACCESS_TOKEN: ${{ secrets.VIMEO_ACCESS_TOKEN }}
             VIMEO_VIDEO_ID: ${{ secrets.VIMEO_VIDEO_ID }}
-            VIDEO_PATH: ${{ secrets.PROJECT }}.mp4
+            VIDEO_PATH: ${{ vars.PROJECT }}.mp4
 
         - name: Download PDF Artifacts
           uses: actions/download-artifact@v3.0.2
@@ -147,14 +150,14 @@
           with:
             tag_name: ${{ steps.tag_version.outputs.new_tag }}
             files: |
-              ${{ secrets.PROPOSAL }}.pdf
-              ${{ secrets.REPORT }}.pdf
-              ${{ secrets.PROJECT }}.mp4
+              ${{ vars.PROPOSAL }}.pdf
+              ${{ vars.REPORT }}.pdf
+              ${{ vars.PROJECT }}.mp4
             body: |
               DELIVERABLES:
-                - [${{ secrets.PROPOSAL }}.pdf](${{secrets.DOWNLOAD_URI}}/${{ steps.tag_version.outputs.new_tag }}/${{ secrets.PROPOSAL }}.pdf)
-                - [${{ secrets.REPORT }}.pdf](${{secrets.DOWNLOAD_URI}}/${{ steps.tag_version.outputs.new_tag }}/${{ secrets.REPORT }}.pdf)
-                - [${{ secrets.PROJECT }}.mp4](${{secrets.DOWNLOAD_URI}}/${{ steps.tag_version.outputs.new_tag }}/${{ secrets.PROJECT }}.mp4)
+                - [${{ vars.PROPOSAL }}.pdf](${{vars.DOWNLOAD_URI}}/${{ steps.tag_version.outputs.new_tag }}/${{ vars.PROPOSAL }}.pdf)
+                - [${{ vars.REPORT }}.pdf](${{vars.DOWNLOAD_URI}}/${{ steps.tag_version.outputs.new_tag }}/${{ vars.REPORT }}.pdf)
+                - [${{ vars.PROJECT }}.mp4](${{vars.DOWNLOAD_URI}}/${{ steps.tag_version.outputs.new_tag }}/${{ vars.PROJECT }}.mp4)
 
               VIDEO DURATION: ${{ needs.build-video.outputs.duration }}
             draft: false
