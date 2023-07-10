@@ -5,7 +5,11 @@
         "dockerfile": "Dockerfile"
     },
     "onCreateCommand": "./.devcontainer/oncreate.sh",
+    "postStartCommand": "nohup bash -c 'jupyter notebook --ip=0.0.0.0 --port=8888 --allow-root &'",
     "waitFor": "onCreateCommand",
+    "forwardPorts": [
+        8888
+    ],
     "customizations": {
         "vscode": {
             "extensions": [
@@ -17,6 +21,7 @@
                 "mechatroner.rainbow-csv",
                 "ms-azuretools.vscode-docker",
                 "ms-python.autopep8",
+                "ms-python.black-formatter",
                 "ms-python.isort",
                 "ms-python.python",
                 "ms-toolsai.jupyter",
@@ -34,7 +39,7 @@
                     "editor.formatOnSave": true,
                     "python.defaultInterpreterPath": "/opt/conda/bin/python",
                     "python.autoselectInterpreter": true,
-                    "python.formatting.provider": "autopep8"
+                    "python.formatting.provider": "black"
                 }
             }
         }
