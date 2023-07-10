@@ -12,7 +12,6 @@ pdf2image==1.16.3
 Pillow==10.0.0
 plotly==5.15.0
 python-pptx==0.6.21
-pyttsx3==2.90
 scikit-learn==1.2.2
 scipy==1.10.1
 seaborn==0.12.2
