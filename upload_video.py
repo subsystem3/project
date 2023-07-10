@@ -13,7 +13,7 @@ VIDEO_URI = f"/videos/{VIDEO_ID}"
 
 
 try:
-    response = client.put(VIDEO_URI, data={"file": VIDEO_PATH})
+    response = client.replace(VIDEO_URI, data={"file": VIDEO_PATH})
     response.raise_for_status()
     print(f"Video replaced at {VIDEO_URI}")
 except Exception as e:
