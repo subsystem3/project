@@ -83,6 +83,7 @@ jobs:
           path: Final-Project-Team-2.mp4
 
   release:
+    needs: [build-pdfs, build-video]
     runs-on: ubuntu-latest
     steps:
       - name: Check out main branch
