@@ -60,6 +60,9 @@
             restore-keys: |
               ${{ runner.os }}-pip-
 
+        - name: Change ownership of apt archives
+          run: sudo chown -R $(whoami) /var/cache/apt/archives
+
         - name: Cache apt packages
           uses: actions/cache@v3.3.1
           with:
@@ -144,6 +147,8 @@
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             WITH_V: true
             PRERELEASE: true
+          with:
+            default_bump: minor
 
         - name: Release
           uses: softprops/action-gh-release@v0.1.15
@@ -160,9 +165,8 @@
                 - [${{ vars.PROJECT }}.mp4](${{vars.DOWNLOAD_URI}}/${{ steps.tag_version.outputs.new_tag }}/${{ vars.PROJECT }}.mp4)
 
               VIDEO DURATION: ${{ needs.build-video.outputs.duration }}
+
+              VIDEO LINK: <https://vimeo.com/${{ secrets.VIMEO_VIDEO_ID }}/2f1e66d926?share=copy>
+
             draft: false
             prerelease: true
-
-        - name: Logout of GitHub Container Registry
-          run: docker logout ghcr.io
-          if: always()
