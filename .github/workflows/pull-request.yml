@@ -58,6 +58,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
+      - name: Change ownership of apt archives
+        run: sudo chown -R $(whoami) /var/cache/apt/archives
+
       - name: Cache apt packages
         uses: actions/cache@v3.3.1
         with:
@@ -103,3 +106,20 @@ jobs:
           VIMEO_ACCESS_TOKEN: ${{ secrets.VIMEO_ACCESS_TOKEN }}
           VIMEO_VIDEO_ID: ${{ secrets.VIMEO_VIDEO_ID }}
           VIDEO_PATH: ${{ vars.PROJECT }}.mp4
+
+  tag:
+    needs: [build-pdfs, build-video]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v3.5.3
+        with:
+          ref: dev
+          fetch-depth: '0'
+
+      - name: Bump version and push tag
+        uses: anothrNick/github-tag-action@1.67.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+          DEFAULT_BUMP: minor
