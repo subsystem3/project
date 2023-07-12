@@ -12,10 +12,10 @@
 \usepackage{float}
 \usepackage{geometry}
 \usepackage{graphicx}
+\usepackage{hanging}
 \usepackage{hyperref}
 \usepackage{lipsum}
 \usepackage{longtable}
-\usepackage{microtype}
 \usepackage{multirow}
 \usepackage{natbib}
 \usepackage{pdfpages}
@@ -26,129 +26,211 @@
 \usepackage{tikz}
 \usepackage{xcolor}
 
+% page layout
+\geometry{ letterpaper, left=1in, right=1in, top=1in, bottom=1in, }
+
 % color scheme
 \definecolor{primary}{RGB}{0,120,215}
 \definecolor{secondary}{RGB}{255,87,34}
 \definecolor{background}{RGB}{245,245,245}
+\definecolor{blue}{RGB}{0,62,126}
 
-% page layout
-\geometry{ letterpaper, left=1in, right=1in, top=1in, bottom=1in, }
+% page color
+\pagecolor{background}
 
 % hyperlink colors
 \hypersetup{ colorlinks=true, linkcolor=primary, filecolor=secondary,
     urlcolor=primary, }
 
-% page color
-\pagecolor{background}
+% line spacing
+\setstretch{1.15}
+
+% indent each reference by 0.5in on the second line
+\setlength{\bibhang}{0.5in}
 
 % no paragraph indentation
 \setlength{\parindent}{0pt}
 
 \begin{document}
 
-\setstretch{1.15}
-\definecolor{blue}{RGB}{0,62,126}
-
 \newcommand{\mytitlepage}[2]{
     \thispagestyle{empty}
 
     \begin{tikzpicture}[remember picture, overlay]
         \node [inner sep=0pt] at (current page.center) {#1}; { \node [
-            anchor=center, inner sep=1.25cm, rectangle, fill=blue!70!white,
-            fill opacity=0,
-            text opacity=1, minimum height=0.2\paperheight, minimum
-            width=\paperwidth, text
-            width=0.8\paperwidth, font=\fontfamily{pnc}\selectfont ] at
-        (current
-        page.center) {#2}; } \node [anchor=south east, outer sep=3pt] at
-        (current
-        page.south east)
-        {\includegraphics[width=0.33\paperwidth]{images/logo.png}};
+            anchor=center, inner sep=1.25cm, rectangle, fill=blue!70!white, fill opacity=0,
+            text opacity=1, minimum height=0.2\paperheight, minimum width=\paperwidth, text
+            width=0.8\paperwidth, font=\fontfamily{pnc}\selectfont ] at (current
+        page.center) {#2}; } \node [anchor=south east, outer sep=3pt] at (current
+        page.south east) {\includegraphics[width=0.33\paperwidth]{images/logo.png}};
     \end{tikzpicture}
 
     \newpage
 }
 
 { \mytitlepage{\includegraphics[width=\paperwidth]{images/background.png}} {
-        \centering\fontfamily{phv}\selectfont {\Huge \bfseries Real-Time Brand
-            Sentiment Analysis on Social Media Using Deep Learning \par}
+        \centering
+        \fontfamily{phv}
+
+        \vspace{-200pt} % move title up
+
+        { \Huge
+            \bfseries
+
+            Real-Time Brand Sentiment Analysis of Social Media Text Content
+
+            \par
+        }
+
         \vspace{8pt}
-        {\begin{center}
-                \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}c c c}
-                    {\LARGE Jonathan Agustin} & {\LARGE Fernando Calderon} &
-                    {\LARGE Juliet Lawton}
-                \end{tabular*}
-            \end{center}}
+
+        { \Large
+            \bfseries
+
+            Proposal
+
+            \par
+        }
+
         \vspace{24pt}
-        {\LARGE\bfseries \par} } }
+
+        {
+            \begin{center}
+                \begin{tabular*} {\textwidth}{@{\extracolsep{\fill}}c c c}
+                    {\LARGE Jonathan Agustin} & {\LARGE Fernando Calderon} & {\LARGE Juliet Lawton}
+                \end{tabular*}
+            \end{center}
+        } } }
 
 \pagenumbering{arabic}
 
-\section{Introduction}
+\begin{abstract}
 
-Businesses increasingly leverage social media platforms to track public
-perception of their brands. Many use Text Classification, Sentiment Analysis,
-and Natural Language Processing (NLP) to extract subjective information about
-specific brands from the vast corpus of unstructured social media text data. We
-propose to construct a system that includes training, evaluating, and deploying
-Machine Learning (ML) models. The model will be trained to pinpoint a brand
-within a text and categorize sentiment towards the brand as positive, negative,
-or neutral. The goal is to empower businesses with real-time insights into
-public sentiment about their brands, enabling businesses to quickly react and
-adapt to shifts in public sentiment. Ultimately, the proposed system aims to
-enhance the ability of businesses to maintain a positive brand image and gain a
-competitive edge.
+    \noindent Businesses increasingly leverage social media platforms to track
+    brand perception using Natural Language Processing (NLP), Classification, and
+    Sentiment Analysis. Machine Learning (ML) models are trained with a large
+    corpus of social media text data using Deep Learning to classify a brand and
+    categorize sentiment towards the brand as positive, negative, or neutral.
+    However, existing systems are either inaccessible or limited in their ability
+    to provide real-time insights into public sentiment about a brand. We introduce
+    an automated system that provides real-time insight on brand sentiment,
+    enabling quick reaction to shifts in public sentiment. The proposed system
+    enhances the ability to maintain a positive brand image and stay ahead of the
+    competition.
 
-\section{Problem Statement}
+\end{abstract}
 
-Consider a set $T = \{t_1, t_2, \ldots, t_n\}$, where each element $t_i$
-represents a unique social media post. Each $t_i$ is a textual data point with
-no image, video, or audio information. Define $B = \{b_1, b_2, \ldots, b_m\}$
-as a finite set that symbolizes distinct brands, with $b_0$ as a special
-element signifying the absence of a recognizable brand. Define $S = \{-1, 0,
-    1\}$ as a finite set that represents sentiment labels, with $s_0$ as a special
-element that denotes the absence of a discernible sentiment. The sentiment
-labels are defined as follows:
+\section*{Problem}
+
+Given a set $B$ of strings representing brand names $B = \{b_1 =
+    \texttt{"Nike"}, b_2 = \texttt{"Google"}, b_3 = \texttt{"Disney"}, \ldots,
+    b_i\}$ and a set $P$ of strings representing social media posts
 \begin{align*}
-    -1 & = \text{negative sentiment} \\
-    0  & = \text{neutral sentiment}  \\
-    1  & = \text{positive sentiment}
+    p_1 & = \texttt{"Celebrating my birthday"}                      \\
+    p_2 & = \texttt{"I could care less about the new Air Force 1s"} \\
+    p_3 & = \texttt{"Happiest place on Earth"}                      \\
+        & \vdots                                                    \\
+    p_j & \in P
 \end{align*}
 
-The first function $f_1: T \rightarrow B \cup \{b_0\}$ is defined as:
+the goal is to build a $\mathrm{BrandClassifier}(p)$ that predicts whether a
+social media post $p$ expresses a brand, and returns a brand name $b$ when the
+post expresses the brand, or $\texttt{No-Brand}$ when the post does not express
+any brand. The model also returns a confidence score $c \in [0, 1]$ that
+indicates how confident the model is in its prediction.
 
 \[
-    f_1(t_i) =
-    \begin{cases}
-        b_j & \text{if } t_i \text{ mentions brand } b_j \\
-        b_0 & \text{otherwise}
+    \mathrm{BrandClassifier}(p) \rightarrow \begin{cases}
+        (b, c)                 & \text{if } p \text{ expresses a brand } b \in
+        B
+        \\
+        (\texttt{No-Brand}, c) & \text{otherwise}
     \end{cases}
 \]
 
-The second function $f_2: B \cup \{b_0\} \times T \rightarrow S \cup \{s_0\}$
-is defined as:
+We build another model $\mathrm{BrandSentimentAnalyzer}(p, b)$ that predicts
+the sentiment of a social media post towards a brand, and returns a sentiment
+label
 
 \[
-    f_2(b_j, t_i) =
-    \begin{cases}
-        s_k & \text{if } t_i \text{ expresses sentiment } s_k \text{ towards
-        brand } b_j                                                          \\
-        s_0 & \text{otherwise}
+    s \in S =
+    \{
+    s^{+}=\texttt{Positive},
+    s^{-}=\texttt{Negative},
+    s^{0}=\texttt{Neutral},
+    s^{?}=\texttt{Mixed}
+    \}
+\]
+
+when the post expresses sentiment towards the brand, or $\texttt{No-Sentiment}$
+when it does not express any sentiment. The model also returns a confidence
+score $c \in [0, 1]$.
+
+\[
+    \mathrm{BrandSentimentAnalyzer}(p, b) \rightarrow \begin{cases}
+        (s, c)                     & \text{if } p \text{ expresses sentiment }
+        s \in S \text{ about brand } b \in B
+        \\
+        (\texttt{No-Sentiment}, c) & \text{otherwise}
     \end{cases}
 \]
+\textbf{Example.} Given the following social media post $p_3 = \texttt{"I could
+        care less about the new Air Force 1s"}$ and $b_3 = \texttt{"Nike"}$
+\begin{align*}
+     & \mathrm{BrandClassifier}(p_3) \rightarrow (b_3, 0.68)               \\
+     & \mathrm{BrandSentimentAnalyzer}(p_3, b_3) \rightarrow (s^{-}, 0.82)
+\end{align*}
 
-The overall task is a composition of functions:
+\newpage
 
-\[
-    f = f_2 \circ (f_1 \times id_T)
-\]
+\section*{Methodology}
 
-where $\circ$ denotes function composition and $\times$ denotes the Cartesian
-product. This composition maps each post to a brand (or $b_0$) and then assigns
-a sentiment label to each brand-post pair. The identity function $id_T$
-maintains the original social media post in the pair, ensuring the sentiment
-label is assigned to the correct post-brand pair. The output of this
-composition is a sentiment label for each social media post.\\
+The work is divided into four stages: assessment, development, deployment, and
+evaluation. Each stage informs and refines previous stages, creating a feedback
+loop that continuously improves the overall system.
+
+\begin{enumerate}[leftmargin=*]
+
+    \item \textbf{Assessment.} The stage involves selecting and testing
+          appropriate models and datasets. The specific requirements of the sentiment
+          analysis task, the characteristics of the available data, and the nature of the
+          problem guide this selection process. The chosen models must effectively handle
+          the unstructured and noisy data typical of social media and accurately capture
+          and predict sentiments. The selected datasets must accurately represent the
+          social media environment and provide a diverse view of expressed sentiments.
+
+    \item \textbf{Development.} This stage preprocesses data in real-time to
+          simulate a live data stream and training the selected models. The unstructured
+          and noisy nature of social media data necessitates the transformation of text
+          into a structured format suitable for modeling. This process involves handling
+          invalid values and discarding non-textual content such as images, videos, or
+          audio. Automation ensures efficiency in this process. The selected models are
+          then adapted to the preprocessed dataset and trained to identify a brand or
+          align with the sentiment expressed in the social media text.
+
+    \item \textbf{Deployment.} This stage deploys the models to process social
+          media data in near real-time. This stage requires building infrastructure to
+          support the models and integrating the models with social media platforms such
+          as Twitter where data will be streamed.
+
+    \item \textbf{Evaluation.} This stage measures the models' ability to
+          identify brands and predict sentiment in social media. For a time period,
+          social media posts are collected and manually labeled for brand and sentiment.
+          Standard classification metrics such as Accuracy, Precision, Recall, and F1
+          Score are used to evaluate the models. The models are then ranked by
+          performance.
+
+\end{enumerate}
+
+\section*{Expected Behaviors \& Outcomes}
+We expect our models to demonstrate a nuanced understanding of the English
+language, accurately identifying brands and sentiments. Despite the inherent
+challenges associated with sentiment analysis and brand identification in text
+data, we anticipate that our models will achieve an accuracy rate exceeding
+50\%. We foresee our models to have real-world applicability, serving as a
+valuable tool for businesses to accurately analyze sentiment from social media
+data. The proposed system is expected to provide actionable insights that
+enable companies to make informed decisions.\\
 \\
 \textbf{Limitations.} The model's primary limitation is its unimodal nature. It
 processes only text data, ignoring non-textual elements like images, videos,
@@ -161,73 +243,6 @@ information and discard the input completely. Future work should consider
 expanding the model to a multimodal framework to provide a more comprehensive
 sentiment analysis of social media posts.
 
-\section{Methodology}
-
-The work is divided into four stages: assessment, development, deployment, and
-evaluation. Each stage informs and refines previous stages, creating a feedback
-loop that continuously improves the overall system.
-
-\begin{itemize}[leftmargin=*]
-
-    \item \textbf{Assessment.} The stage involves selecting and testing
-          appropriate models and datasets. The specific requirements of the
-          sentiment
-          analysis task, the characteristics of the available data, and the
-          nature of the
-          problem guide this selection process. The chosen models must
-          effectively handle
-          the unstructured and noisy data typical of social media and
-          accurately capture
-          and predict sentiments. The selected datasets must accurately
-          represent the
-          social media environment and provide a diverse view of expressed
-          sentiments.
-
-    \item \textbf{Development.} This stage preprocesses data in real-time to
-          simulate a live data stream and training the selected models. The
-          unstructured
-          and noisy nature of social media data necessitates the transformation
-          of text
-          into a structured format suitable for modeling. This process involves
-          handling
-          invalid values and discarding non-textual content such as images,
-          videos, or
-          audio. Automation ensures efficiency in this process. The selected
-          models are
-          then adapted to the preprocessed dataset and trained to identify a
-          brand or
-          align with the sentiment expressed in the social media text.
-
-    \item \textbf{Deployment.} This stage deploys the models to process social
-          media data in near real-time. This stage requires building
-          infrastructure to
-          support the models and integrating the models with social media
-          platforms such
-          as Twitter where data will be streamed.
-
-    \item \textbf{Evaluation.} This stage measures the models' ability to
-          identify brands and predict sentiment in social media. For a time
-          period,
-          social media posts are collected and manually labeled for brand and
-          sentiment.
-          Standard classification metrics such as Accuracy, Precision, Recall,
-          and F1
-          Score are used to evaluate the models. The models are then ranked by
-          performance.
-
-\end{itemize}
-
-\section{Expected Behaviors \& Outcomes}
-
-We expect our models to demonstrate a nuanced understanding of human language,
-accurately identifying brands and sentiments. Despite the inherent challenges
-associated with sentiment analysis and brand identification in text data, we
-anticipate that our models will achieve an accuracy rate exceeding 50\%. We
-foresee our models to have real-world applicability, serving as a valuable tool
-for businesses to accurately analyze sentiment from social media data. The
-proposed system is expected to provide actionable insights that enable
-companies to make informed decisions.
-
 \newpage
 
 \begin{thebibliography}{}
@@ -239,8 +254,7 @@ companies to make informed decisions.
 
     \bibitem[Liu et al., 2019]{liu2019roberta}
     Liu, Y., Ott, M., Goyal, N., Du, J., Joshi, M., Chen, D., \ldots \&
-    Stoyanov, V. (2019). \newblock RoBERTa: A Robustly Optimized BERT
-    Pretraining
+    Stoyanov, V. (2019). \newblock RoBERTa: A Robustly Optimized BERT Pretraining
     Approach. \newblock {\em arXiv preprint arXiv:1907.11692}.
 
     \bibitem[Radford et al., 2019]{radford2019language}
@@ -250,16 +264,13 @@ companies to make informed decisions.
 
     \bibitem[Sanh et al., 2019]{sanh2019distilbert}
     Sanh, V., Debut, L., Chaumond, J., \& Wolf, T. (2019). \newblock
-    DistilBERT, a distilled version of BERT: smaller, faster, cheaper and
-    lighter.
+    DistilBERT, a distilled version of BERT: smaller, faster, cheaper and lighter.
     \newblock {\em arXiv preprint arXiv:1910.01108}.
 
     \bibitem[Hutto \& Gilbert, 2014]{hutto2014vader}
     Hutto, C.J., \& Gilbert, E. (2014). \newblock VADER: A Parsimonious
-    Rule-based Model for Sentiment Analysis of Social Media Text. \newblock
-    {\em
-        Eighth International Conference on Weblogs and Social Media (ICWSM-14).
-        Ann
+    Rule-based Model for Sentiment Analysis of Social Media Text. \newblock {\em
+        Eighth International Conference on Weblogs and Social Media (ICWSM-14). Ann
         Arbor, MI, June 2014}.
 
 \end{thebibliography}
