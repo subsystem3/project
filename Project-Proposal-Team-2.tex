@@ -58,11 +58,16 @@
 
     \begin{tikzpicture}[remember picture, overlay]
         \node [inner sep=0pt] at (current page.center) {#1}; { \node [
-            anchor=center, inner sep=1.25cm, rectangle, fill=blue!70!white, fill opacity=0,
-            text opacity=1, minimum height=0.2\paperheight, minimum width=\paperwidth, text
-            width=0.8\paperwidth, font=\fontfamily{pnc}\selectfont ] at (current
-        page.center) {#2}; } \node [anchor=south east, outer sep=3pt] at (current
-        page.south east) {\includegraphics[width=0.33\paperwidth]{images/logo.png}};
+            anchor=center, inner sep=1.25cm, rectangle, fill=blue!70!white,
+            fill opacity=0,
+            text opacity=1, minimum height=0.2\paperheight, minimum
+            width=\paperwidth, text
+            width=0.8\paperwidth, font=\fontfamily{pnc}\selectfont ] at
+        (current
+        page.center) {#2}; } \node [anchor=south east, outer sep=3pt] at
+        (current
+        page.south east)
+        {\includegraphics[width=0.33\paperwidth]{images/logo.png}};
     \end{tikzpicture}
 
     \newpage
@@ -74,7 +79,8 @@
         \vspace{8pt}
         {\begin{center}
                 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}c c c}
-                    {\LARGE Jonathan Agustin} & {\LARGE Fernando Calderon} & {\LARGE Juliet Lawton}
+                    {\LARGE Jonathan Agustin} & {\LARGE Fernando Calderon} &
+                    {\LARGE Juliet Lawton}
                 \end{tabular*}
             \end{center}}
         \vspace{24pt}
@@ -104,7 +110,8 @@ represents a unique social media post. Each $t_i$ is a textual data point with
 no image, video, or audio information. Define $B = \{b_1, b_2, \ldots, b_m\}$
 as a finite set that symbolizes distinct brands, with $b_0$ as a special
 element signifying the absence of a recognizable brand. Define $S = \{-1, 0,
-    1\}$ as a finite set that represents sentiment labels. The sentiment labels are
+    1\}$ as a finite set that represents sentiment labels. The sentiment labels
+are
 defined as follows:
 \begin{align*}
     -1 & = \text{negative sentiment} \\
@@ -122,15 +129,22 @@ The first function $f_1: T \rightarrow B \cup \{b_0\}$ is defined as:
     \end{cases}
 \]
 
-The second function $f_2: B \cup \{b_0\} \times T \rightarrow S \cup \{s_0\}$
+The second function $f_2: B \cup \{b_0\} \times T \rightarrow S$
 is defined as:
 
 \[
     f_2(b_j, t_i) =
     \begin{cases}
-        s_k & \text{if } t_i \text{ expresses sentiment } s_k \text{ towards
-        brand } b_j                                                          \\
-        s_0 & \text{otherwise}
+        -1 & \text{if } t_i \text{ expresses negative sentiment towards
+            brand } b_j
+        \\
+        0  & \text{if } t_i \text{ expresses neutral sentiment or no
+            discernible
+            sentiment towards
+            brand } b_j, \text{ or if } b_j = b_0
+        \\
+        1  & \text{if } t_i \text{ expresses positive sentiment towards
+            brand } b_j
     \end{cases}
 \]
 
@@ -141,12 +155,14 @@ The overall task is a composition of functions:
 \]
 
 where $\circ$ denotes function composition and $\times$ denotes the Cartesian
-product. This composition maps each post to a brand (or $b_0$) and then assigns
-a sentiment label to each brand-post pair. The identity function $id_T$
-maintains the original social media post in the pair, ensuring the sentiment
-label is assigned to the correct post-brand pair. The output of this
-composition is a sentiment label for each social media post.\\
-\\
+product. This composition maps each post to a brand (or $b_0$ if no
+identifiable brand) and then assigns a sentiment label to each brand-post pair.
+The identity function $id_T$ maintains the original social media post in the
+pair, ensuring the sentiment label is assigned to the correct post-brand pair.
+The output of this composition is a sentiment label for each social media
+post.\\
+
+\newpage
 \textbf{Limitations.} The model's primary limitation is its unimodal nature. It
 processes only text data, ignoring non-textual elements like images, videos,
 and audio clips. Often found in social media posts, these elements can contain
@@ -167,31 +183,48 @@ loop that continuously improves the overall system.
 \begin{itemize}[leftmargin=*]
 
     \item \textbf{Assessment.} The stage involves selecting and testing
-          appropriate models and datasets. The specific requirements of the sentiment
-          analysis task, the characteristics of the available data, and the nature of the
-          problem guide this selection process. The chosen models must effectively handle
-          the unstructured and noisy data typical of social media and accurately capture
-          and predict sentiments. The selected datasets must accurately represent the
-          social media environment and provide a diverse view of expressed sentiments.
+          appropriate models and datasets. The specific requirements of the
+          sentiment
+          analysis task, the characteristics of the available data, and the
+          nature of the
+          problem guide this selection process. The chosen models must
+          effectively handle
+          the unstructured and noisy data typical of social media and
+          accurately capture
+          and predict sentiments. The selected datasets must accurately
+          represent the
+          social media environment and provide a diverse view of expressed
+          sentiments.
 
     \item \textbf{Development.} This stage preprocesses data in real-time to
-          simulate a live data stream and training the selected models. The unstructured
-          and noisy nature of social media data necessitates the transformation of text
-          into a structured format suitable for modeling. This process involves handling
-          invalid values and discarding non-textual content such as images, videos, or
-          audio. Automation ensures efficiency in this process. The selected models are
-          then adapted to the preprocessed dataset and trained to identify a brand or
+          simulate a live data stream and training the selected models. The
+          unstructured
+          and noisy nature of social media data necessitates the transformation
+          of text
+          into a structured format suitable for modeling. This process involves
+          handling
+          invalid values and discarding non-textual content such as images,
+          videos, or
+          audio. Automation ensures efficiency in this process. The selected
+          models are
+          then adapted to the preprocessed dataset and trained to identify a
+          brand or
           align with the sentiment expressed in the social media text.
 
     \item \textbf{Deployment.} This stage deploys the models to process social
-          media data in near real-time. This stage requires building infrastructure to
-          support the models and integrating the models with social media platforms such
+          media data in near real-time. This stage requires building
+          infrastructure to
+          support the models and integrating the models with social media
+          platforms such
           as Twitter where data will be streamed.
 
     \item \textbf{Evaluation.} This stage measures the models' ability to
-          identify brands and predict sentiment in social media. For a time period,
-          social media posts are collected and manually labeled for brand and sentiment.
-          Standard classification metrics such as Accuracy, Precision, Recall, and F1
+          identify brands and predict sentiment in social media. For a time
+          period,
+          social media posts are collected and manually labeled for brand and
+          sentiment.
+          Standard classification metrics such as Accuracy, Precision, Recall,
+          and F1
           Score are used to evaluate the models. The models are then ranked by
           performance.
 
@@ -219,7 +252,8 @@ companies to make informed decisions.
 
     \bibitem[Liu et al., 2019]{liu2019roberta}
     Liu, Y., Ott, M., Goyal, N., Du, J., Joshi, M., Chen, D., \ldots \&
-    Stoyanov, V. (2019). \newblock RoBERTa: A Robustly Optimized BERT Pretraining
+    Stoyanov, V. (2019). \newblock RoBERTa: A Robustly Optimized BERT
+    Pretraining
     Approach. \newblock {\em arXiv preprint arXiv:1907.11692}.
 
     \bibitem[Radford et al., 2019]{radford2019language}
@@ -229,13 +263,16 @@ companies to make informed decisions.
 
     \bibitem[Sanh et al., 2019]{sanh2019distilbert}
     Sanh, V., Debut, L., Chaumond, J., \& Wolf, T. (2019). \newblock
-    DistilBERT, a distilled version of BERT: smaller, faster, cheaper and lighter.
+    DistilBERT, a distilled version of BERT: smaller, faster, cheaper and
+    lighter.
     \newblock {\em arXiv preprint arXiv:1910.01108}.
 
     \bibitem[Hutto \& Gilbert, 2014]{hutto2014vader}
     Hutto, C.J., \& Gilbert, E. (2014). \newblock VADER: A Parsimonious
-    Rule-based Model for Sentiment Analysis of Social Media Text. \newblock {\em
-        Eighth International Conference on Weblogs and Social Media (ICWSM-14). Ann
+    Rule-based Model for Sentiment Analysis of Social Media Text. \newblock
+    {\em
+        Eighth International Conference on Weblogs and Social Media (ICWSM-14).
+        Ann
         Arbor, MI, June 2014}.
 
 \end{thebibliography}
