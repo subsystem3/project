@@ -166,7 +166,7 @@
 
               VIDEO DURATION: ${{ needs.build-video.outputs.duration }}
 
-              VIDEO LINK: <https://vimeo.com/${{ secrets.VIMEO_VIDEO_ID }}/2f1e66d926?share=copy>
+              VIDEO LINK: <https://vimeo.com/${{ secrets.VIMEO_VIDEO_ID }}/2f1e66d926>
 
             draft: false
             prerelease: true
