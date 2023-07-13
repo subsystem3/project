@@ -3,6 +3,7 @@ ffmpeg
 libreoffice
 pandoc
 poppler-utils
+python3-pip
 texlive
 texlive-latex-extra
 texlive-fonts-extra
