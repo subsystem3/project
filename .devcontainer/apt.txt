@@ -1,5 +1,7 @@
+black
 chktex
 ffmpeg
+isort
 libreoffice
 pandoc
 poppler-utils
@@ -9,3 +11,4 @@ texlive-latex-extra
 texlive-fonts-extra
 texlive-bibtex-extra
 texlive-science
+xvfb 
