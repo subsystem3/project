@@ -164,5 +164,6 @@ cython_debug/
 *.fdb_latexmk
 *.fls
 *.synctex.gz
+*.synctex.gz(busy)
 *.log
 *.out
