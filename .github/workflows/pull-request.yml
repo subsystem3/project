@@ -49,20 +49,6 @@ jobs:
             popd > /dev/null
           done
 
-      - name: Comment PDFs
-        run: |
-          PR_ID=$(echo 44)
-          COMMENT_ENDPOINT="/repos/subsystem3/project/issues/$PR_ID/comments"
-          for pdf_file in pdfs/*; do
-            BASE64_PDF=$(base64 $pdf_file)
-            PAYLOAD=$(echo -n '{ "body": "'$BASE64_PDF'" }' | base64)
-            curl -sSL \
-              -H "Authorization: token ***" \
-              -H "Content-Type: application/json" \
-              -d "$PAYLOAD" \
-              "$COMMENT_ENDPOINT"
-          done
-
       - name: Upload PDF Artifacts to workflow run
         uses: actions/upload-artifact@v3.1.2
         with:
@@ -70,6 +56,10 @@ jobs:
           path: |
             ${{ vars.REPORT }}.pdf
             ${{ vars.PROPOSAL }}.pdf
+
+
+
+
 
   build-video:
     environment: pull_request
@@ -165,15 +155,13 @@ jobs:
       with:
         script: |
           const issue_number = context.payload.pull_request.number;
+          const artifact_url = `${context.payload.repository.html_url}/actions/runs/${context.runId}`;
           const vimeo_url = `https://vimeo.com/${process.env.VIMEO_VIDEO_ID}`;
           github.rest.issues.createComment({
             owner: context.repo.owner,
             repo: context.repo.repo,
             issue_number: issue_number,
-            body: `If video generation was successful, it will be available on Vimeo [here](${vimeo_url}).`
+            body: `Workflow artifacts (pdfs/video): [here](${artifact_url}). Vimeo link: [here](${vimeo_url}).`
           });
       env:
-        VIMEO_CLIENT_ID: ${{ secrets.VIMEO_CLIENT_ID }}
-        VIMEO_CLIENT_SECRET: ${{ secrets.VIMEO_CLIENT_SECRET }}
-        VIMEO_ACCESS_TOKEN: ${{ secrets.VIMEO_ACCESS_TOKEN }}
         VIMEO_VIDEO_ID: ${{ secrets.VIMEO_VIDEO_ID }}
