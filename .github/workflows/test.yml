@@ -25,6 +25,7 @@ jobs:
           fetch-depth: '0'
 
       - name: Generate PDFs
+        shell: bash
         run: |
           find . -name "*.tex" | while read -r file
           do
