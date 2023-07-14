@@ -102,7 +102,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-apt-
 
+      - name: Check for changes in PowerPoint and assets
+        id: check_files
+        run: |
+          echo "::set-output name=pptx_changed::$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep '\.pptx$')"
+          echo "::set-output name=assets_changed::$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep '^assets/')"
+        shell: bash
+
       - name: Generate Video
+        if: steps.check_files.outputs.pptx_changed != '' || steps.check_files.outputs.assets_changed != ''
         run: |
           # install dependencies
           sudo apt-get update
