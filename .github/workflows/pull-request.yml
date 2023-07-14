@@ -47,6 +47,17 @@ jobs:
             popd > /dev/null
           done
 
+      - name: Comment PDFs
+        run: |
+          PR_ID=$(echo ${{ github.event.pull_request.number }})
+          COMMENT_ENDPOINT="/repos/${{ github.repository }}/issues/$PR_ID/comments"
+          for pdf_file in pdfs/*; do
+            BASE64_PDF=$(base64 $pdf_file)
+            PAYLOAD=$(echo -n '{ "body": "'$BASE64_PDF'" }' | base64)
+            curl -sSL \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Content-Type: application/json
+
       - name: Upload PDF Artifacts to workflow run
         uses: actions/upload-artifact@v3.1.2
         with:
@@ -56,8 +67,8 @@ jobs:
             ${{ vars.PROPOSAL }}.pdf
 
   build-video:
-    runs-on: ubuntu-latest
     environment: pull_request
+    runs-on: ubuntu-latest
     steps:
       - name: Check out dev branch
         uses: actions/checkout@v3.5.3
@@ -104,12 +115,6 @@ jobs:
           # generate video
           python3 pptx2video.py ${{ vars.PROJECT }}.pptx
 
-      - name: Upload Video Artifact
-        uses: actions/upload-artifact@v3.1.2
-        with:
-          name: video
-          path: ${{ vars.PROJECT }}.mp4
-
       - name: Upload to Vimeo via Python API
         run: |
           python3 -m pip install --upgrade pip
@@ -121,6 +126,12 @@ jobs:
           VIMEO_ACCESS_TOKEN: ${{ secrets.VIMEO_ACCESS_TOKEN }}
           VIMEO_VIDEO_ID: ${{ secrets.VIMEO_VIDEO_ID }}
           VIDEO_PATH: ${{ vars.PROJECT }}.mp4
+
+      - name: Upload Video Artifact
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          name: video
+          path: ${{ vars.PROJECT }}.mp4
 
   tag:
     needs: [build-pdfs, build-video]
@@ -138,3 +149,27 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: true
           DEFAULT_BUMP: minor
+
+  comment-pr:
+    needs: [build-pdfs, build-video, tag]
+    environment: pull_request
+    runs-on: ubuntu-latest
+    steps:
+    - name: Comment PR
+      uses: actions/github-script@v5
+      with:
+        script: |
+          const issue_number = context.payload.pull_request.number;
+          const artifact_url = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+          const vimeo_url = `https://vimeo.com/${process.env.VIMEO_VIDEO_ID}`;
+          github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: issue_number,
+            body: `Inspect generated artifacts [here](${artifact_url}). If video generation was successful, it will be available on [here](${vimeo_url}).`
+          });
+      env:
+        VIMEO_CLIENT_ID: ${{ secrets.VIMEO_CLIENT_ID }}
+        VIMEO_CLIENT_SECRET: ${{ secrets.VIMEO_CLIENT_SECRET }}
+        VIMEO_ACCESS_TOKEN: ${{ secrets.VIMEO_ACCESS_TOKEN }}
+        VIMEO_VIDEO_ID: ${{ secrets.VIMEO_VIDEO_ID }}
