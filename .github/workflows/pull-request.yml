@@ -51,14 +51,17 @@ jobs:
 
       - name: Comment PDFs
         run: |
-          PR_ID=$(echo ${{ github.event.pull_request.number }})
-          COMMENT_ENDPOINT="/repos/${{ github.repository }}/issues/$PR_ID/comments"
+          PR_ID=$(echo 44)
+          COMMENT_ENDPOINT="/repos/subsystem3/project/issues/$PR_ID/comments"
           for pdf_file in pdfs/*; do
             BASE64_PDF=$(base64 $pdf_file)
             PAYLOAD=$(echo -n '{ "body": "'$BASE64_PDF'" }' | base64)
             curl -sSL \
-              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-              -H "Content-Type: application/json
+              -H "Authorization: token ***" \
+              -H "Content-Type: application/json" \
+              -d "$PAYLOAD" \
+              "$COMMENT_ENDPOINT"
+          done
 
       - name: Upload PDF Artifacts to workflow run
         uses: actions/upload-artifact@v3.1.2
@@ -162,13 +165,12 @@ jobs:
       with:
         script: |
           const issue_number = context.payload.pull_request.number;
-          const artifact_url = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
           const vimeo_url = `https://vimeo.com/${process.env.VIMEO_VIDEO_ID}`;
           github.rest.issues.createComment({
             owner: context.repo.owner,
             repo: context.repo.repo,
             issue_number: issue_number,
-            body: `Inspect generated artifacts [here](${artifact_url}). If video generation was successful, it will be available on [here](${vimeo_url}).`
+            body: `If video generation was successful, it will be available on Vimeo [here](${vimeo_url}).`
           });
       env:
         VIMEO_CLIENT_ID: ${{ secrets.VIMEO_CLIENT_ID }}
