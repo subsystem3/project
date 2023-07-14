@@ -80,16 +80,23 @@
 \author{
   \AND
   Ashish Vaswani\thanks{Equal contribution. Listing order is random. Jakob
-    proposed replacing RNNs with self-attention and started the effort to evaluate
+    proposed replacing RNNs with self-attention and started the effort to
+    evaluate
     this idea.
-    Ashish, with Illia, designed and implemented the first Transformer models and
-    has been crucially involved in every aspect of this work. Noam proposed scaled
+    Ashish, with Illia, designed and implemented the first Transformer models
+    and
+    has been crucially involved in every aspect of this work. Noam proposed
+    scaled
     dot-product attention, multi-head attention and the parameter-free position
     representation and became the other person involved in nearly every detail.
-    Niki designed, implemented, tuned and evaluated countless model variants in our
-    original codebase and tensor2tensor. Llion also experimented with novel model
-    variants, was responsible for our initial codebase, and efficient inference and
-    visualizations. Lukasz and Aidan spent countless long days designing various
+    Niki designed, implemented, tuned and evaluated countless model variants in
+    our
+    original codebase and tensor2tensor. Llion also experimented with novel
+    model
+    variants, was responsible for our initial codebase, and efficient inference
+    and
+    visualizations. Lukasz and Aidan spent countless long days designing
+    various
     parts of and implementing tensor2tensor, replacing our earlier codebase,
     greatly improving results and massively accelerating our research.
   }\\
@@ -134,18 +141,23 @@
   The dominant sequence transduction models are based on complex recurrent or
   convolutional neural networks that include an encoder and a decoder. The best
   performing models also connect the encoder and decoder through an attention
-  mechanism. We propose a new simple network architecture, the Transformer, based
+  mechanism. We propose a new simple network architecture, the Transformer,
+  based
   solely on attention mechanisms, dispensing with recurrence and convolutions
-  entirely. Experiments on two machine translation tasks show these models to be
+  entirely. Experiments on two machine translation tasks show these models to
+  be
   superior in quality while being  more parallelizable and requiring
-  significantly less time to train. Our model achieves 28.4 BLEU on the WMT 2014
+  significantly less time to train. Our model achieves 28.4 BLEU on the WMT
+  2014
   English-to-German translation task, improving over the existing best results,
-  including ensembles, by over 2 BLEU.  On the WMT 2014 English-to-French
+  including ensembles, by over 2 BLEU.	On the WMT 2014 English-to-French
   translation task, our model establishes a new single-model state-of-the-art
-  BLEU score of 41.8 after training for 3.5 days on eight GPUs, a small fraction
-  of the training costs of the best models from the literature. We show that the
+  BLEU score of 41.8 after training for 3.5 days on eight GPUs, a small
+  fraction
+  of the training costs of the best models from the literature. We show that
+  the
   Transformer generalizes well to other tasks by applying it successfully to
-  English constituency parsing  both with large and limited training data.
+  English constituency parsing	both with large and limited training data.
   % \blfootnote{Code available at \url{https://github.com/tensorflow/tensor2tensor}}
 
   %TODO(noam): update results for new models.
@@ -258,7 +270,8 @@ their fruitful comments, corrections and inspiration.
   \newblock In {\em Proc. of NAACL}, 2016.
 
   \bibitem{JonasFaceNet2017}
-  Jonas Gehring, Michael Auli, David Grangier, Denis Yarats, and Yann~N. Dauphin.
+  Jonas Gehring, Michael Auli, David Grangier, Denis Yarats, and Yann~N.
+  Dauphin.
   \newblock Convolutional sequence to sequence learning.
   \newblock {\em arXiv preprint arXiv:1705.03122v2}, 2017.
 
@@ -275,7 +288,8 @@ their fruitful comments, corrections and inspiration.
 
   \bibitem{hochreiter2001gradient}
   Sepp Hochreiter, Yoshua Bengio, Paolo Frasconi, and J{\"u}rgen Schmidhuber.
-  \newblock Gradient flow in recurrent nets: the difficulty of learning long-term
+  \newblock Gradient flow in recurrent nets: the difficulty of learning
+  long-term
   dependencies, 2001.
 
   \bibitem{hochreiter1997}
@@ -298,7 +312,8 @@ their fruitful comments, corrections and inspiration.
   \bibitem{extendedngpu}
   {\L}ukasz Kaiser and Samy Bengio.
   \newblock Can active memory replace attention?
-  \newblock In {\em Advances in Neural Information Processing Systems, ({NIPS})},
+  \newblock In {\em Advances in Neural Information Processing Systems,
+      ({NIPS})},
   2016.
 
   \bibitem{neural_gpu}
@@ -316,7 +331,8 @@ their fruitful comments, corrections and inspiration.
   \bibitem{structuredAttentionNetworks}
   Yoon Kim, Carl Denton, Luong Hoang, and Alexander~M. Rush.
   \newblock Structured attention networks.
-  \newblock In {\em International Conference on Learning Representations}, 2017.
+  \newblock In {\em International Conference on Learning Representations},
+  2017.
 
   \bibitem{kingma2014adam}
   Diederik Kingma and Jimmy Ba.
@@ -329,13 +345,15 @@ their fruitful comments, corrections and inspiration.
   \newblock {\em arXiv preprint arXiv:1703.10722}, 2017.
 
   \bibitem{lin2017structured}
-  Zhouhan Lin, Minwei Feng, Cicero Nogueira~dos Santos, Mo~Yu, Bing Xiang, Bowen
+  Zhouhan Lin, Minwei Feng, Cicero Nogueira~dos Santos, Mo~Yu, Bing Xiang,
+  Bowen
   Zhou, and Yoshua Bengio.
   \newblock A structured self-attentive sentence embedding.
   \newblock {\em arXiv preprint arXiv:1703.03130}, 2017.
 
   \bibitem{multiseq2seq}
-  Minh-Thang Luong, Quoc~V. Le, Ilya Sutskever, Oriol Vinyals, and Lukasz Kaiser.
+  Minh-Thang Luong, Quoc~V. Le, Ilya Sutskever, Oriol Vinyals, and Lukasz
+  Kaiser.
   \newblock Multi-task sequence to sequence learning.
   \newblock {\em arXiv preprint arXiv:1511.06114}, 2015.
 
@@ -398,7 +416,8 @@ their fruitful comments, corrections and inspiration.
   \bibitem{sukhbaatar2015}
   Sainbayar Sukhbaatar, Arthur Szlam, Jason Weston, and Rob Fergus.
   \newblock End-to-end memory networks.
-  \newblock In C.~Cortes, N.~D. Lawrence, D.~D. Lee, M.~Sugiyama, and R.~Garnett,
+  \newblock In C.~Cortes, N.~D. Lawrence, D.~D. Lee, M.~Sugiyama, and
+  R.~Garnett,
   editors, {\em Advances in Neural Information Processing Systems 28}, pages
   2440--2448. Curran Associates, Inc., 2015.
 
@@ -420,9 +439,11 @@ their fruitful comments, corrections and inspiration.
   \newblock In {\em Advances in Neural Information Processing Systems}, 2015.
 
   \bibitem{wu2016google}
-  Yonghui Wu, Mike Schuster, Zhifeng Chen, Quoc~V Le, Mohammad Norouzi, Wolfgang
+  Yonghui Wu, Mike Schuster, Zhifeng Chen, Quoc~V Le, Mohammad Norouzi,
+  Wolfgang
   Macherey, Maxim Krikun, Yuan Cao, Qin Gao, Klaus Macherey, et~al.
-  \newblock Google's neural machine translation system: Bridging the gap between
+  \newblock Google's neural machine translation system: Bridging the gap
+  between
   human and machine translation.
   \newblock {\em arXiv preprint arXiv:1609.08144}, 2016.
 
@@ -435,7 +456,8 @@ their fruitful comments, corrections and inspiration.
   \bibitem{zhu-EtAl:2013:ACL}
   Muhua Zhu, Yue Zhang, Wenliang Chen, Min Zhang, and Jingbo Zhu.
   \newblock Fast and accurate shift-reduce constituent parsing.
-  \newblock In {\em Proceedings of the 51st Annual Meeting of the ACL (Volume 1:
+  \newblock In {\em Proceedings of the 51st Annual Meeting of the ACL (Volume
+      1:
       Long Papers)}, pages 434--443. ACL, August 2013.
 
 \end{thebibliography}

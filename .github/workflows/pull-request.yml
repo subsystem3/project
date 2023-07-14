@@ -2,7 +2,7 @@ name: Pull Request
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, dev]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -26,13 +26,28 @@ jobs:
 
       - name: Generate PDFs
         run: |
-          # generate twice to get past title page bug
-          pdflatex ${{ vars.REPORT }}.tex
-          pdflatex ${{ vars.REPORT }}.tex
-          pdflatex ${{ vars.PROPOSAL }}.tex
-          pdflatex ${{ vars.PROPOSAL }}.tex
+          find . -name "*.tex" | while read -r file
+          do
+            # CHANGE DIRECTORY DUE TO RELATIVE PATHS IN BUILDING
+            dir=$(dirname "$file")
+            base=$(basename "$file")
+            base_no_ext="${base%.*}"
+            pushd "$dir" > /dev/null
 
-      - name: Upload PDF Artifacts
+            # DELETE OLD PDF IF IT EXISTS
+            rm -f "${base_no_ext}.pdf"
+
+            # BUILD PDF
+            pdflatex -interaction=nonstopmode "$base"
+
+            # CLEAN
+            rm *.aux *.log *.out *.toc *.fdb_latexmk *.fls
+
+            # RETURN TO ORIGINAL DIRECTORY
+            popd > /dev/null
+          done
+
+      - name: Upload PDF Artifacts to workflow run
         uses: actions/upload-artifact@v3.1.2
         with:
           name: pdfs
