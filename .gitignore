@@ -163,7 +163,6 @@ cython_debug/
 *.aux
 *.fdb_latexmk
 *.fls
-*.synctex.gz
 *.synctex.gz(busy)
 *.log
 *.out
