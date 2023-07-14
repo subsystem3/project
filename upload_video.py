@@ -1,4 +1,5 @@
 import os
+
 import vimeo
 
 client = vimeo.VimeoClient(
