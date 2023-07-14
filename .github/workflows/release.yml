@@ -28,7 +28,8 @@ jobs:
       - name: Generate PDFs
         shell: bash
         run: |
-          find . -name "*.tex" | while read -r file
+          # LOOK FOR .tex ONLY IN CURRENT WORKING DIRECTORY
+          for file in *.tex
           do
             # CHANGE DIRECTORY DUE TO RELATIVE PATHS IN BUILDING
             dir=$(dirname "$file")
