@@ -102,33 +102,31 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-apt-
 
-      - name: Check for changes in PowerPoint and assets
-        id: check_files
-        run: |
-          echo "::set-output name=pptx_changed::$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep '\.pptx$')"
-          echo "::set-output name=assets_changed::$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep '^assets/')"
-        shell: bash
-
       - name: Generate Video
-        if: steps.check_files.outputs.pptx_changed != '' || steps.check_files.outputs.assets_changed != ''
         run: |
-          # install dependencies
-          sudo apt-get update
-          sudo apt-get -y install \
-            ffmpeg \
-            libreoffice \
-            poppler-utils \
-            bc
+          # check for changes in PowerPoint and assets
+          pptx_changed=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep '\.pptx$')
+          assets_changed=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep '^assets/')
 
-          python3 -m pip install --upgrade pip
-          python3 -m pip install \
-            gTTS  \
-            moviepy \
-            pdf2image  \
-            python-pptx
+          if [ -n "$pptx_changed" ] || [ -n "$assets_changed" ]; then
+            # install dependencies
+            sudo apt-get update
+            sudo apt-get -y install \
+              ffmpeg \
+              libreoffice \
+              poppler-utils \
+              bc
 
-          # generate video
-          python3 pptx2video.py ${{ vars.PROJECT }}.pptx
+            python3 -m pip install --upgrade pip
+            python3 -m pip install \
+              gTTS  \
+              moviepy \
+              pdf2image  \
+              python-pptx
+
+            # generate video
+            python3 pptx2video.py ${{ vars.PROJECT }}.pptx
+          fi
 
       - name: Upload Video Artifact
         uses: actions/upload-artifact@v3.1.2
