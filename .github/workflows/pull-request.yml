@@ -13,6 +13,22 @@ permissions:
   packages: read
 
 jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v3.5.3
+        with:
+          ref: dev
+          fetch-depth: '0'
+
+      - name: Bump version and push tag
+        uses: anothrNick/github-tag-action@1.67.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+          DEFAULT_BUMP: minor
+
   build-pdfs:
     runs-on: ubuntu-latest
     container:
@@ -56,10 +72,6 @@ jobs:
           path: |
             ${{ vars.REPORT }}.pdf
             ${{ vars.PROPOSAL }}.pdf
-
-
-
-
 
   build-video:
     environment: pull_request
@@ -127,23 +139,6 @@ jobs:
         with:
           name: video
           path: ${{ vars.PROJECT }}.mp4
-
-  tag:
-    needs: [build-pdfs, build-video]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out branch
-        uses: actions/checkout@v3.5.3
-        with:
-          ref: dev
-          fetch-depth: '0'
-
-      - name: Bump version and push tag
-        uses: anothrNick/github-tag-action@1.67.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          WITH_V: true
-          DEFAULT_BUMP: minor
 
   comment-pr:
     needs: [build-pdfs, build-video, tag]
