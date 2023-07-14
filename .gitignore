@@ -166,3 +166,6 @@ cython_debug/
 *.synctex.gz(busy)
 *.log
 *.out
+
+# USE WORKFLOW TO GENERATE PDFs
+*.pdf
