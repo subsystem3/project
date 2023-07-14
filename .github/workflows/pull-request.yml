@@ -160,7 +160,7 @@ jobs:
           const issue_number = context.payload.pull_request.number;
           const artifact_url = `${context.payload.repository.html_url}/actions/runs/${context.runId}`;
           const vimeo_url = `https://vimeo.com/${process.env.VIMEO_VIDEO_ID}`;
-          github.rest.pulls.createComment({
+          github.rest.issues.createComment({
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
