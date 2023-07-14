@@ -1,181 +1,181 @@
-  name: Release
+name: Release
 
-  on:
-    pull_request:
-      branches: [main]
-      types: [closed]
+on:
+  pull_request:
+    branches: [main]
+    types: [closed]
 
-  concurrency:
-    group: ${{ github.workflow }}-${{ github.ref }}
-    cancel-in-progress: true
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
-  permissions:
-    contents: write
-    packages: read
+permissions:
+  contents: write
+  packages: read
 
-  jobs:
-    build-pdfs:
-      runs-on: ubuntu-latest
-      container:
-        image: texlive/texlive:latest
-      steps:
-        - name: Check out main branch
-          uses: actions/checkout@v3.5.3
-          with:
-            ref: main
-            fetch-depth: '0'
+jobs:
+  build-pdfs:
+    runs-on: ubuntu-latest
+    container:
+      image: texlive/texlive:latest
+    steps:
+      - name: Check out main branch
+        uses: actions/checkout@v3.5.3
+        with:
+          ref: main
+          fetch-depth: '0'
 
-        - name: Generate PDFs
-          shell: bash
-          run: |
-            find . -name "*.tex" | while read -r file
-            do
-              # CHANGE DIRECTORY DUE TO RELATIVE PATHS IN BUILDING
-              dir=$(dirname "$file")
-              base=$(basename "$file")
-              base_no_ext="${base%.*}"
-              pushd "$dir" > /dev/null
+      - name: Generate PDFs
+        shell: bash
+        run: |
+          find . -name "*.tex" | while read -r file
+          do
+            # CHANGE DIRECTORY DUE TO RELATIVE PATHS IN BUILDING
+            dir=$(dirname "$file")
+            base=$(basename "$file")
+            base_no_ext="${base%.*}"
+            pushd "$dir" > /dev/null
 
-              # DELETE OLD PDF IF IT EXISTS
-              rm -f "${base_no_ext}.pdf"
+            # DELETE OLD PDF IF IT EXISTS
+            rm -f "${base_no_ext}.pdf"
 
-              # BUILD PDF
-              pdflatex -interaction=nonstopmode "$base"
+            # BUILD PDF
+            pdflatex -interaction=nonstopmode "$base"
 
-              # CLEAN
-              rm *.aux *.log *.out *.toc *.fdb_latexmk *.fls
+            # CLEAN
+            rm *.aux *.log *.out *.toc *.fdb_latexmk *.fls
 
-              # RETURN TO ORIGINAL DIRECTORY
-              popd > /dev/null
-            done
+            # RETURN TO ORIGINAL DIRECTORY
+            popd > /dev/null
+          done
 
-        - name: Push PDFs to main
-          run: |
-            git config --global user.name 'GitHub Actions'
-            git config --global user.email 'github-actions@github.com'
-            git add **/*.pdf
-            git commit -m "Add generated PDFs"
-            git push
+      - name: Push PDFs to main
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'github-actions@github.com'
+          git add **/*.pdf
+          git commit -m "Add generated PDFs"
+          git push
 
-    build-video:
-      runs-on: ubuntu-latest
-      outputs:
-        duration: ${{ steps.generate-video.outputs.duration }}
-      steps:
-        - name: Check out main branch
-          uses: actions/checkout@v3.5.3
-          with:
-            ref: main
-            fetch-depth: '0'
+  build-video:
+    runs-on: ubuntu-latest
+    outputs:
+      duration: ${{ steps.generate-video.outputs.duration }}
+    steps:
+      - name: Check out main branch
+        uses: actions/checkout@v3.5.3
+        with:
+          ref: main
+          fetch-depth: '0'
 
-        - name: Cache pip packages
-          uses: actions/cache@v3.3.1
-          with:
-            path: ~/.cache/pip
-            key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-            restore-keys: |
-              ${{ runner.os }}-pip-
+      - name: Cache pip packages
+        uses: actions/cache@v3.3.1
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
-        - name: Change ownership of apt archives
-          run: sudo chown -R $(whoami) /var/cache/apt/archives
+      - name: Change ownership of apt archives
+        run: sudo chown -R $(whoami) /var/cache/apt/archives
 
-        - name: Cache apt packages
-          uses: actions/cache@v3.3.1
-          with:
-            path: /var/cache/apt/archives
-            key: ${{ runner.os }}-apt-${{ hashFiles('/etc/apt/sources.list') }}
-            restore-keys: |
-              ${{ runner.os }}-apt-
+      - name: Cache apt packages
+        uses: actions/cache@v3.3.1
+        with:
+          path: /var/cache/apt/archives
+          key: ${{ runner.os }}-apt-${{ hashFiles('/etc/apt/sources.list') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-
 
-        - name: Generate Video
-          id: generate-video
-          run: |
-            # install dependencies
-            sudo apt-get update
-            sudo apt-get -y install \
-              ffmpeg \
-              libreoffice \
-              poppler-utils \
-              bc
+      - name: Generate Video
+        id: generate-video
+        run: |
+          # install dependencies
+          sudo apt-get update
+          sudo apt-get -y install \
+            ffmpeg \
+            libreoffice \
+            poppler-utils \
+            bc
 
-            python3 -m pip install --upgrade pip
-            python3 -m pip install \
-              gTTS  \
-              moviepy \
-              pdf2image  \
-              python-pptx
+          python3 -m pip install --upgrade pip
+          python3 -m pip install \
+            gTTS  \
+            moviepy \
+            pdf2image  \
+            python-pptx
 
-            # generate video
-            python3 pptx2video.py ${{ vars.PROJECT }}.pptx
+          # generate video
+          python3 pptx2video.py ${{ vars.PROJECT }}.pptx
 
-            # get total video duration
-            total_seconds=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ${{ vars.PROJECT }}.mp4)
-            hours=$(bc <<< "${total_seconds}/3600")
-            minutes=$(bc <<< "(${total_seconds}%3600)/60")
-            seconds=$(printf "%.0f" $(bc <<< "${total_seconds}%60"))
-            humanized_duration="${hours}h ${minutes}m ${seconds}s"
-            echo "duration=$humanized_duration" >> "$GITHUB_OUTPUT"
+          # get total video duration
+          total_seconds=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ${{ vars.PROJECT }}.mp4)
+          hours=$(bc <<< "${total_seconds}/3600")
+          minutes=$(bc <<< "(${total_seconds}%3600)/60")
+          seconds=$(printf "%.0f" $(bc <<< "${total_seconds}%60"))
+          humanized_duration="${hours}h ${minutes}m ${seconds}s"
+          echo "duration=$humanized_duration" >> "$GITHUB_OUTPUT"
 
-        - name: Push video and assets (used to make video) to main
-          run: |
-            git config --global user.name 'GitHub Actions'
-            git config --global user.email 'github-actions@github.com'
-            git add assets
-            git add **/*.mp4
-            git commit -m "Add assets and video"
-            git push
+      - name: Push video and assets (used to make video) to main
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'github-actions@github.com'
+          git add assets
+          git add **/*.mp4
+          git commit -m "Add assets and video"
+          git push
 
-    release:
-      if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
-      needs: [build-pdfs, build-video]
-      environment: production
-      runs-on: ubuntu-latest
-      steps:
-        - name: Check out main branch
-          uses: actions/checkout@v3.5.3
-          with:
-            ref: ${{ github.event.pull_request.merge_commit_sha }}
-            fetch-depth: '0'
+  release:
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
+    needs: [build-pdfs, build-video]
+    environment: production
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out main branch
+        uses: actions/checkout@v3.5.3
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          fetch-depth: '0'
 
-        - name: Upload to Vimeo via Python API
-          run: |
-            python3 -m pip install --upgrade pip
-            pip install PyVimeo
-            python3 upload_video.py
-          env:
-            VIMEO_CLIENT_ID: ${{ secrets.VIMEO_CLIENT_ID }}
-            VIMEO_CLIENT_SECRET: ${{ secrets.VIMEO_CLIENT_SECRET }}
-            VIMEO_ACCESS_TOKEN: ${{ secrets.VIMEO_ACCESS_TOKEN }}
-            VIMEO_VIDEO_ID: ${{ secrets.VIMEO_VIDEO_ID }}
-            VIDEO_PATH: ${{ vars.PROJECT }}.mp4
+      - name: Upload to Vimeo via Python API
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install PyVimeo
+          python3 upload_video.py
+        env:
+          VIMEO_CLIENT_ID: ${{ secrets.VIMEO_CLIENT_ID }}
+          VIMEO_CLIENT_SECRET: ${{ secrets.VIMEO_CLIENT_SECRET }}
+          VIMEO_ACCESS_TOKEN: ${{ secrets.VIMEO_ACCESS_TOKEN }}
+          VIMEO_VIDEO_ID: ${{ secrets.VIMEO_VIDEO_ID }}
+          VIDEO_PATH: ${{ vars.PROJECT }}.mp4
 
-        - name: Bump version and push tag
-          id: tag_version
-          uses: anothrNick/github-tag-action@1.67.0
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            WITH_V: true
-            PRERELEASE: true
-          with:
-            default_bump: minor
+      - name: Bump version and push tag
+        id: tag_version
+        uses: anothrNick/github-tag-action@1.67.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+          PRERELEASE: true
+        with:
+          default_bump: minor
 
-        - name: Release
-          uses: softprops/action-gh-release@v0.1.15
-          with:
-            tag_name: ${{ steps.tag_version.outputs.new_tag }}
-            files: |
-              ${{ vars.PROPOSAL }}.pdf
-              ${{ vars.REPORT }}.pdf
-              ${{ vars.PROJECT }}.mp4
-            body: |
-              DELIVERABLES:
-                - [${{ vars.PROPOSAL }}.pdf](${{vars.DOWNLOAD_URI}}/${{ steps.tag_version.outputs.new_tag }}/${{ vars.PROPOSAL }}.pdf)
-                - [${{ vars.REPORT }}.pdf](${{vars.DOWNLOAD_URI}}/${{ steps.tag_version.outputs.new_tag }}/${{ vars.REPORT }}.pdf)
-                - [${{ vars.PROJECT }}.mp4](${{vars.DOWNLOAD_URI}}/${{ steps.tag_version.outputs.new_tag }}/${{ vars.PROJECT }}.mp4)
+      - name: Release
+        uses: softprops/action-gh-release@v0.1.15
+        with:
+          tag_name: ${{ steps.tag_version.outputs.new_tag }}
+          files: |
+            ${{ vars.PROPOSAL }}.pdf
+            ${{ vars.REPORT }}.pdf
+            ${{ vars.PROJECT }}.mp4
+          body: |
+            DELIVERABLES:
+              - [${{ vars.PROPOSAL }}.pdf](${{vars.DOWNLOAD_URI}}/${{ steps.tag_version.outputs.new_tag }}/${{ vars.PROPOSAL }}.pdf)
+              - [${{ vars.REPORT }}.pdf](${{vars.DOWNLOAD_URI}}/${{ steps.tag_version.outputs.new_tag }}/${{ vars.REPORT }}.pdf)
+              - [${{ vars.PROJECT }}.mp4](${{vars.DOWNLOAD_URI}}/${{ steps.tag_version.outputs.new_tag }}/${{ vars.PROJECT }}.mp4)
 
-              VIDEO DURATION: ${{ needs.build-video.outputs.duration }}
+            VIDEO DURATION: ${{ needs.build-video.outputs.duration }}
 
-              VIDEO LINK: <https://vimeo.com/${{ secrets.VIMEO_VIDEO_ID }}/2f1e66d926>
+            VIDEO LINK: <https://vimeo.com/${{ secrets.VIMEO_VIDEO_ID }}/2f1e66d926>
 
-            draft: false
-            prerelease: true
+          draft: false
+          prerelease: true
