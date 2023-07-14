@@ -110,26 +110,15 @@
 
 \pagenumbering{arabic}
 
-\begin{abstract}
+\section*{Introduction}
 
-    \noindent Businesses increasingly leverage social media platforms to track
-    brand perception using Natural Language Processing (NLP), Classification, and
-    Sentiment Analysis. Machine Learning (ML) models are trained with a large
-    corpus of social media text data using Deep Learning to classify a brand and
-    categorize sentiment towards the brand as positive, negative, or neutral.
-    However, existing systems are either inaccessible or limited in ability. We
-    introduce an automated system that provides real-time insight on brand
-    sentiment, enabling quick reaction to shifts in public sentiment. The proposed
-    system enhances the ability to maintain a positive brand image and stay ahead
-    of the competition.
-
-\end{abstract}
+    \noindent Businesses increasingly leverage social media platforms to track brand perception using Natural Language Processing (NLP), Classification, and Sentiment Analysis. Machine Learning (ML) models are trained with a large corpus of social media text data using Deep Learning to classify a brand and categorize sentiment towards the brand as positive, negative, or neutral. The objective of this project is to train a ML model on the Sentiment140 dataset to classify the sentiment of tweets, allowing brands to quickly react to shifts in public sentiment and maintain a positive brand image. We will experiment with a variety of different ML algorithms, such as Naïve Bayes and Logistic Regression, to find the best fit.
 
 \section*{Problem}
 
 Given a set $B$ of strings representing brand names $B = \{b_1 =
     \texttt{"Nike"}, b_2 = \texttt{"Google"}, b_3 = \texttt{"Disney"}, \ldots,
-    b_i\}$ and a set $P$ of strings representing social media posts
+    b_i\}$ and a set $P$ of strings representing Twitter posts
 \begin{align*}
     p_1 & = \texttt{"Celebrating my birthday"}                      \\
     p_2 & = \texttt{"I could care less about the new Air Force 1s"} \\
@@ -140,7 +129,7 @@ Given a set $B$ of strings representing brand names $B = \{b_1 =
 
 the goal is to build a $\mathrm{BrandClassifier}(p)$ model that predicts
 whether a
-social media post $p$ expresses a brand, and returns a brand name $b$ when the
+Twitter post $p$ expresses a brand, and returns a brand name $b$ when the
 post expresses the brand, or $\texttt{No-Brand}$ when the post does not express
 any brand. The model also returns a confidence score $c \in [0, 1]$ that
 indicates how confident the model is in its prediction.
@@ -155,7 +144,7 @@ indicates how confident the model is in its prediction.
 \]
 
 We also build a $\mathrm{BrandSentimentAnalyzer}(p, b)$ model that predicts
-the sentiment of a social media post towards a brand, and returns a sentiment
+the sentiment of a Twitter post towards a brand, and returns a sentiment
 label
 
 \[
@@ -180,64 +169,56 @@ score $c \in [0, 1]$.
         (\texttt{No-Sentiment}, c) & \text{otherwise}
     \end{cases}
 \]
-\textbf{Example.} Given the following social media post $p_3 = \texttt{"I could
+\textbf{Example.} Given the following Twitter post $p_3 = \texttt{"I could
         care less about the new Air Force 1s"}$ and $b_3 = \texttt{"Nike"}$:
 \begin{align*}
      & \mathrm{BrandClassifier}(p_3) \rightarrow (b_3, 0.68)               \\
      & \mathrm{BrandSentimentAnalyzer}(p_3, b_3) \rightarrow (s^{-}, 0.82)
 \end{align*}
 
-\newpage
+For this problem, the primary machine learning algorithms for consideration are Naïve Bayes, Logistic Regression, Support Vector Machines, Recurrent Neural Networks, and Transformers (such as BERT).
+
+\section*{Related Course Topics}
+
+This project will cover a variety of topics from AAI 501, patricularly Natural Language Processing and Classification. More topics may also be covered depending on which model is selected. The potential topics covered include:
+\begin{enumerate}[leftmargin=*]
+
+    \item{Natural Language Processing}
+    \item{Classification}
+    \item{Regression}
+    \item{Supervised Machine Learning}
+    \item{Bayesian Networks}
+    \item{Deep Learning}
+    
+\end{enumerate}
 
 \section*{Methodology}
 
-The work is divided into four stages: assessment, development, deployment, and
+The work is divided into three stages: assessment, development, and
 evaluation. Each stage informs and refines previous stages, creating a feedback
 loop that continuously improves the overall system.
 
 \begin{enumerate}[leftmargin=*]
 
-    \item \textbf{Assessment.} The stage involves selecting and testing
-          appropriate models and datasets. The specific requirements of the
+    \item \textbf{Assessment.} The stage involves analyzing the dataset and selecting and testing
+          appropriate models. The specific requirements of the
           sentiment
           analysis task, the characteristics of the available data, and the
           nature of the
-          problem guide this selection process. The chosen models must
-          effectively handle
-          the unstructured and noisy data typical of social media and
-          accurately capture
-          and predict sentiments. The selected datasets must accurately
-          represent the
-          social media environment and provide a diverse view of expressed
-          sentiments.
+          problem guide this selection process.
 
-    \item \textbf{Development.} This stage preprocesses data in real-time to
-          simulate a live data stream and training the selected models. The
-          unstructured
-          and noisy nature of social media data necessitates the transformation
-          of text
-          into a structured format suitable for modeling. This process involves
+    \item \textbf{Development.} This stage involves training and tuning the selected models. This process involves
           handling
           invalid values and discarding non-textual content such as images,
           videos, or
           audio. Automation ensures efficiency in this process. The selected
           models are
-          then adapted to the preprocessed dataset and trained to identify a
+          trained to identify a
           brand or
-          align with the sentiment expressed in the social media text.
-
-    \item \textbf{Deployment.} This stage deploys the models to process social
-          media data in near real-time. This stage requires building
-          infrastructure to
-          support the models and integrating the models with social media
-          platforms such
-          as Twitter where data will be streamed.
+          align with the sentiment expressed in a tweet, and then tuned to improve performance.
 
     \item \textbf{Evaluation.} This stage measures the models' ability to
-          identify brands and predict sentiment in social media. For a time
-          period,
-          social media posts are collected and manually labeled for brand and
-          sentiment.
+          identify brands and predict sentiment in Twitter posts. The tweets used for validation can come 	  from a test set partitioned from the original dataset, as well as from the Twitter API.
           Standard classification metrics such as Accuracy, Precision, Recall,
           and F1
           Score are used to evaluate the models. The models are then ranked by
@@ -255,14 +236,14 @@ valuable tool for businesses to accurately analyze sentiment from social media
 data. The proposed system is expected to provide actionable insights that
 enable companies to make informed decisions.\\
 \\
-\textbf{Limitations.} The model's primary limitation is its unimodal nature. It
-processes only text data, ignoring non-textual elements like images, videos,
+\textbf{Known Challenges} A well-known problem in sentiment analysis is the "aboutness" problem. This problem refers to the challenge of determining the subject of the sentiment expressed in a sentence. For our scenario, this may manifest in one of two ways - complex sentences and ambiguous subjects. In the first instance, take for example the sentence "I love Disneyland but hate how expensive the tickets are." This sentence expresses both positive and negative sentiment towards the brand, Disney, but the overall sentiment is positive. In the second scenario, take for example the sentences "Google is a great company" and "You should google that." The first sentence refers to Google the brand with positive sentiment, and the second sentence refers to google as a verb and should not be regarded as an expression of sentiment towards the brand. \\
+
+\textbf{Limitations} The primary limitation of the model is that it is trained on Twitter posts, so it is not yet able to classify posts from other social media sites, such as Facebook. Another limitation is the unimodal nature of the model. It processes only text data, ignoring non-textual elements like images, videos,
 and audio clips. Often found in social media posts, these elements can contain
 significant sentiment-related information. This information can support,
 contradict, or add nuance to the sentiment expressed in the text. Audio clips,
 for example, can provide sentiment-related cues through tone, pitch, and other
-features. The proposed system, however, will identify this multimodal
-information and discard the input completely. Future work should consider
+features. Future work should consider generalizing the model to work with other kinds of social media posts, as well as
 expanding the model to a multimodal framework to provide a more comprehensive
 sentiment analysis of social media posts.
 
