@@ -27,19 +27,34 @@
 
         - name: Generate PDFs
           run: |
-            # must generate twice
-            pdflatex ${{ vars.REPORT }}.tex
-            pdflatex ${{ vars.REPORT }}.tex
-            pdflatex ${{ vars.PROPOSAL }}.tex
-            pdflatex ${{ vars.PROPOSAL }}.tex
+            find . -name "*.tex" | while read -r file
+            do
+              # CHANGE DIRECTORY DUE TO RELATIVE PATHS IN BUILDING
+              dir=$(dirname "$file")
+              base=$(basename "$file")
+              base_no_ext="${base%.*}"
+              pushd "$dir" > /dev/null
 
-        - name: Upload PDFs
-          uses: actions/upload-artifact@v3.1.2
-          with:
-            name: pdfs
-            path: |
-              ${{ vars.REPORT }}.pdf
-              ${{ vars.PROPOSAL }}.pdf
+              # DELETE OLD PDF IF IT EXISTS
+              rm -f "${base_no_ext}.pdf"
+
+              # BUILD PDF
+              pdflatex -interaction=nonstopmode "$base"
+
+              # CLEAN
+              rm *.aux *.log *.out *.toc *.fdb_latexmk *.fls
+
+              # RETURN TO ORIGINAL DIRECTORY
+              popd > /dev/null
+            done
+
+        - name: Push PDFs to main
+          run: |
+            git config --global user.name 'GitHub Actions'
+            git config --global user.email 'github-actions@github.com'
+            git add **/*.pdf
+            git commit -m "Add generated PDFs"
+            git push
 
     build-video:
       runs-on: ubuntu-latest
@@ -100,28 +115,26 @@
             humanized_duration="${hours}h ${minutes}m ${seconds}s"
             echo "duration=$humanized_duration" >> "$GITHUB_OUTPUT"
 
-        - name: Upload Video
-          uses: actions/upload-artifact@v3.1.2
-          with:
-            name: video
-            path: ${{ vars.PROJECT }}.mp4
+        - name: Push video and assets (used to make video) to main
+          run: |
+            git config --global user.name 'GitHub Actions'
+            git config --global user.email 'github-actions@github.com'
+            git add assets
+            git add **/*.mp4
+            git commit -m "Add assets and video"
+            git push
 
     release:
       if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
       needs: [build-pdfs, build-video]
-      runs-on: ubuntu-latest
       environment: production
+      runs-on: ubuntu-latest
       steps:
         - name: Check out main branch
           uses: actions/checkout@v3.5.3
           with:
             ref: ${{ github.event.pull_request.merge_commit_sha }}
             fetch-depth: '0'
-
-        - name: Download Video Artifacts
-          uses: actions/download-artifact@v3.0.2
-          with:
-            name: video
 
         - name: Upload to Vimeo via Python API
           run: |
@@ -134,11 +147,6 @@
             VIMEO_ACCESS_TOKEN: ${{ secrets.VIMEO_ACCESS_TOKEN }}
             VIMEO_VIDEO_ID: ${{ secrets.VIMEO_VIDEO_ID }}
             VIDEO_PATH: ${{ vars.PROJECT }}.mp4
-
-        - name: Download PDF Artifacts
-          uses: actions/download-artifact@v3.0.2
-          with:
-            name: pdfs
 
         - name: Bump version and push tag
           id: tag_version

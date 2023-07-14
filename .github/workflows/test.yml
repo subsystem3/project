@@ -26,11 +26,26 @@ jobs:
 
       - name: Generate PDFs
         run: |
-          # generate twice to get past title page bug
-          pdflatex ${{ vars.REPORT }}.tex
-          pdflatex ${{ vars.REPORT }}.tex
-          pdflatex ${{ vars.PROPOSAL }}.tex
-          pdflatex ${{ vars.PROPOSAL }}.tex
+          find . -name "*.tex" | while read -r file
+          do
+            # CHANGE DIRECTORY DUE TO RELATIVE PATHS IN BUILDING
+            dir=$(dirname "$file")
+            base=$(basename "$file")
+            base_no_ext="${base%.*}"
+            pushd "$dir" > /dev/null
+
+            # DELETE OLD PDF IF IT EXISTS
+            rm -f "${base_no_ext}.pdf"
+
+            # BUILD PDF
+            pdflatex -interaction=nonstopmode "$base"
+
+            # CLEAN
+            rm *.aux *.log *.out *.toc *.fdb_latexmk *.fls
+
+            # RETURN TO ORIGINAL DIRECTORY
+            popd > /dev/null
+          done
 
       - name: Upload PDF Artifacts
         uses: actions/upload-artifact@v3.1.2
@@ -41,8 +56,8 @@ jobs:
             ${{ vars.PROPOSAL }}.pdf
 
   build-video:
-    runs-on: ubuntu-latest
     environment: test
+    runs-on: ubuntu-latest
     steps:
       - name: Check out dev branch
         uses: actions/checkout@v3.5.3
