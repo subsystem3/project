@@ -143,8 +143,10 @@ class PPTXtoVideo:
             videos (List[AudioFileClip]): List of video clips.
         """
         intro_clip = VideoFileClip("stock/intro.mp4")
-        intro_clip = crossfadeout(intro_clip, 1)  # 1 second fade out
-        videos[0] = crossfadein(videos[0], 1)  # 1 second fade in
+        intro_clip = intro_clip.resize((1920, 1080))
+        # 1 second fade out and fade in
+        intro_clip = crossfadeout(intro_clip, 1)
+        videos[0] = crossfadein(videos[0], 1)
         videos.insert(0, intro_clip)
         final_clip = concatenate_videoclips(videos, method="compose")
         final_clip.write_videofile(self.output_file, fps=24)
