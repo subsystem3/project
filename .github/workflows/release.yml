@@ -117,6 +117,7 @@ jobs:
         run: |
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'github-actions@github.com'
+          git config --global --add safe.directory /__w/project/project
           git add assets
           git add **/*.mp4
           git commit -m "Add assets and video"
