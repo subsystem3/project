@@ -102,9 +102,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-apt-
 
+      - name: Decode and set Google Application Credentials
+        run: echo "${{ env.KEYFILE }}" | base64 --decode > ./keyfile.json
+        env:
+          KEYFILE: ${{ secrets.KEYFILE }}
+
       - name: Generate Video
         shell: bash
-        run: ./generate_video.sh $BEFORE $AFTER ${{ vars.PROJECT }}
+        run: ./generate_video.sh $BEFORE $AFTER ${{ vars.PROJECT }} ./keyfile.json
         env:
           BEFORE: ${{ github.event.before }}
           AFTER: ${{ github.event.after }}

@@ -26,7 +26,7 @@ if [ -n "$pptx_changed" ] || [ -n "$assets_changed" ]; then
     rm -f $3.mp4
 
     # GENERATE VIDEO
-    python3 pptx2video.py $3.pptx
+    python3 pptx2video.py $3.pptx --google-app-creds $4
 
     # GET TOTAL VIDEO DURATION
     total_seconds=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $3.mp4)
