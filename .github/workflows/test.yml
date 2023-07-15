@@ -35,38 +35,18 @@ jobs:
       image: texlive/texlive:latest
     steps:
       - name: Check out dev branch
-        uses: actions/checkout@v3.5.3
+        uses: actions/checkout@v3
         with:
           ref: dev
           fetch-depth: '0'
 
-      - name: Generate PDFs
-        shell: bash
-        run: |
-          # LOOK FOR .tex ONLY IN CURRENT WORKING DIRECTORY
-          for file in *.tex
-          do
-            # CHANGE DIRECTORY DUE TO RELATIVE PATHS IN BUILDING
-            dir=$(dirname "$file")
-            base=$(basename "$file")
-            base_no_ext="${base%.*}"
-            pushd "$dir" > /dev/null
-
-            # DELETE OLD PDF IF IT EXISTS
-            rm -f "${base_no_ext}.pdf"
-
-            # BUILD PDF
-            pdflatex -interaction=nonstopmode "$base"
-
-            # CLEAN
-            rm -f *.aux *.log *.out *.toc *.fdb_latexmk *.fls *.bbl *.run.xml
-
-            # RETURN TO ORIGINAL DIRECTORY
-            popd > /dev/null
-          done
+      - uses: xu-cheng/latex-action@v2
+        with:
+          root_file: "*.tex"
+          glob_root_file: true
 
       - name: Upload PDF Artifacts
-        uses: actions/upload-artifact@v3.1.2
+        uses: actions/upload-artifact@v3
         with:
           name: pdfs
           path: |
@@ -78,13 +58,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out dev branch
-        uses: actions/checkout@v3.5.3
+        uses: actions/checkout@v3
         with:
           ref: dev
           fetch-depth: '2'
 
       - name: Cache pip packages
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v3
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
@@ -95,7 +75,7 @@ jobs:
         run: sudo chown -R $(whoami) /var/cache/apt/archives
 
       - name: Cache apt packages
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v3
         with:
           path: /var/cache/apt/archives
           key: ${{ runner.os }}-apt-${{ hashFiles('/etc/apt/sources.list') }}
@@ -110,7 +90,7 @@ jobs:
           GITHUB_SHA_AFTER: ${{ github.event.after }}
 
       - name: Upload Video Artifact
-        uses: actions/upload-artifact@v3.1.2
+        uses: actions/upload-artifact@v3
         with:
           name: video
           path: ${{ vars.PROJECT }}.mp4
