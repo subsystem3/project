@@ -19,10 +19,10 @@ jobs:
     container:
       image: texlive/texlive:latest
     steps:
-      - name: Check out dev branch
+      - name: Check out main branch
         uses: actions/checkout@v3.5.3
         with:
-          ref: dev
+          ref: main
           fetch-depth: '0'
 
       - name: Generate PDFs
@@ -63,11 +63,11 @@ jobs:
     outputs:
       duration: ${{ steps.generate-video.outputs.duration }}
     steps:
-      - name: Check out dev branch
+      - name: Check out main branch
         uses: actions/checkout@v3
         with:
-          ref: dev
-          fetch-depth: '2'
+          ref: main
+          fetch-depth: '0'
 
       - name: Cache pip packages
         uses: actions/cache@v3
@@ -91,12 +91,37 @@ jobs:
       - name: Generate Video
         id: generate-video
         shell: bash
-        run: ./generate_video.sh $GITHUB_SHA_BEFORE $GITHUB_SHA_AFTER ${{ vars.PROJECT }}
-        env:
-          GITHUB_SHA_BEFORE: ${{ github.event.pull_request.base.sha }}
-          GITHUB_SHA_AFTER: ${{ github.event.pull_request.head.sha }}
+        run: |
+          # INSTALL DEPENDENCIES
+          sudo apt-get update
+          sudo apt-get -y install \
+              ffmpeg \
+              libreoffice \
+              poppler-utils \
+              bc
 
-      - name: Upload Video Artifact
+          python3 -m pip install --upgrade pip
+          python3 -m pip install \
+              gTTS  \
+              moviepy \
+              pdf2image  \
+              python-pptx
+
+          # REMOVE OLD VIDEO
+          rm -f ${{ vars.PROJECT }}.mp4
+
+          # GENERATE VIDEO
+          python3 pptx2video.py ${{ vars.PROJECT }}.pptx
+
+          # GET TOTAL VIDEO DURATION
+          total_seconds=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ${{ vars.PROJECT }}.mp4)
+          hours=$(bc <<< "${total_seconds}/3600")
+          minutes=$(bc <<< "(${total_seconds}%3600)/60")
+          seconds=$(printf "%.0f" $(bc <<< "${total_seconds}%60"))
+          humanized_duration="${hours}h ${minutes}m ${seconds}s"
+          echo "duration=$humanized_duration" >> "$GITHUB_OUTPUT"
+
+      - name: Upload Video Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: video
@@ -113,7 +138,7 @@ jobs:
       - name: Check out main branch
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          ref: main
           fetch-depth: '0'
 
       - name: Download PDF artifacts
@@ -136,7 +161,7 @@ jobs:
           git config --global --add safe.directory /__w/project/project
           git add **/*.pdf
           git add assets
-          git add **/*.mp4
+          git add ${{ vars.PROJECT }}.mp4
           git commit -m "Add assets and video"
           git push
 
