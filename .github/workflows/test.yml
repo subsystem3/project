@@ -51,12 +51,16 @@ jobs:
             base=$(basename "$file")
             base_no_ext="${base%.*}"
             pushd "$dir" > /dev/null
+
             # DELETE OLD PDF IF IT EXISTS
             rm -f "${base_no_ext}.pdf"
+
             # BUILD PDF
             pdflatex -interaction=nonstopmode "$base"
+
             # CLEAN
             rm -f *.aux *.log *.out *.toc *.fdb_latexmk *.fls *.synctex.gz *.bbl *.run.xml
+
             # RETURN TO ORIGINAL DIRECTORY
             popd > /dev/null
           done
