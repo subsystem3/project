@@ -149,7 +149,7 @@ def main():
     )
 
     parser.add_argument(
-        "--google-app-creds",
+        "--keyfile",
         type=str,
         help="The path to the Google service account json file.",
     )
