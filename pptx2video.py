@@ -4,14 +4,20 @@ import shutil
 import subprocess
 from typing import List
 
-from gtts import gTTS
+import numpy as np
 from google.cloud import texttospeech as tts
-from moviepy.editor import AudioFileClip, ImageClip, concatenate_videoclips
+from gtts import gTTS
+from moviepy.audio.AudioClip import AudioArrayClip
+from moviepy.editor import (
+    AudioFileClip,
+    ImageClip,
+    VideoFileClip,
+    concatenate_audioclips,
+    concatenate_videoclips,
+)
+from moviepy.video.compositing.transitions import crossfadein, crossfadeout
 from pdf2image import convert_from_path
 from pptx import Presentation
-
-
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "su23-aai500-group2-456f51963ea0.json"
 
 
 class PPTXtoVideo:
@@ -30,8 +36,21 @@ class PPTXtoVideo:
         ]
 
     def text_to_wav(self, text: str, filename: str, voice_name: str = "en-US-Studio-M"):
+        """
+        Converts the given text to speech and saves it as a .wav file.
+
+        If the GOOGLE_APPLICATION_CREDENTIALS environment variable is set, this method uses
+        Google Cloud Text-to-Speech to generate the speech. Otherwise, it uses gTTS.
+
+        Args:
+            text (str): The text to convert to speech.
+            filename (str): The name of the .wav file to save the speech to.
+            voice_name (str, optional): The name of the voice to use for speech generation.
+                This should be a voice name from Google Cloud Text-to-Speech (e.g., "en-US-Studio-M").
+                Defaults to "en-US-Studio-M".
+        """
+        # USE PROFESSIONAL VOICES FROM GOOGLE CLOUD
         if "GOOGLE_APPLICATION_CREDENTIALS" in os.environ:
-            # Use Google Cloud Text-to-Speech
             language_code = "-".join(voice_name.split("-")[:2])
             text_input = tts.SynthesisInput(text=text)
             voice_params = tts.VoiceSelectionParams(
@@ -48,8 +67,8 @@ class PPTXtoVideo:
 
             with open(filename, "wb") as out:
                 out.write(response.audio_content)
+        # USE FREE NON-PROFESSIONAL VOICES FROM GTTS
         else:
-            # Use gTTS
             voice = gTTS(text=text, lang="en", slow=False)
             voice.save(filename)
 
@@ -107,9 +126,11 @@ class PPTXtoVideo:
             voice_filename = f"{assets_dir}/voice_{i}.wav"
             self.text_to_wav(text, voice_filename)
             audio = AudioFileClip(voice_filename)
-            img_clip = ImageClip(
-                f"{assets_dir}/slide_{i}.png", duration=audio.duration + 1
-            )
+            # Create a silent audio clip of 0.5 seconds
+            silence = AudioArrayClip(np.array([[0], [0]]), fps=44100).set_duration(0.5)
+            # Add silence to the beginning and end of the audio
+            audio = concatenate_audioclips([silence, audio, silence])
+            img_clip = ImageClip(f"{assets_dir}/slide_{i}.png", duration=audio.duration)
             video = img_clip.set_audio(audio)
             videos.append(video)
         return videos
@@ -121,6 +142,10 @@ class PPTXtoVideo:
         Args:
             videos (List[AudioFileClip]): List of video clips.
         """
+        intro_clip = VideoFileClip("stock/intro.mp4")
+        intro_clip = crossfadeout(intro_clip, 1)  # 1 second fade out
+        videos[0] = crossfadein(videos[0], 1)  # 1 second fade in
+        videos.insert(0, intro_clip)
         final_clip = concatenate_videoclips(videos, method="compose")
         final_clip.write_videofile(self.output_file, fps=24)
 
