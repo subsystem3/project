@@ -1,7 +1,6 @@
 {
     "git.autofetch": true,
     "workbench.colorTheme": "Default Dark Modern",
-
     // clean random intermediary files when autogenerating pdfs
     "latex-workshop.latex.autoClean.run": "onBuilt",
 }
