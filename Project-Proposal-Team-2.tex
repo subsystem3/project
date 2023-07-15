@@ -111,11 +111,11 @@
 
 \pagenumbering{arabic}
 
-\textbf{Introduction.} Businesses increasingly leverage social media platforms to track brand perception using Natural Language Processing (NLP), Classification, and Sentiment Analysis (\cite{alessia2015approaches, benedetto2016big}). The Machine Learning (ML) models are trained with social media text content to classify a brand and categorize sentiment towards the brand as positive, negative, neutral, or mixed (\cite{anupama2020real, go2009twitter}). The objective is to train a ML model on the Sentiment140 dataset to classify the sentiment of tweets (\cite{pak2010twitter}). We experiment with a variety of different ML algorithms, such as Naïve Bayes and Logistic Regression, to find the best fit (\cite{howard2018universal}). Ultimately, the models will allow businesses to quickly react to shifts in public sentiment and maintain a positive brand image (\cite{vidya2015twitter, petasis2013large}). \\
+\textbf{Introduction.} Businesses increasingly leverage social media platforms to track brand perception using Natural Language Processing (NLP), Classification, and Sentiment Analysis (\cite{colleoni2011measuring, benedetto2016big}). Machine Learning (ML) models are trained with social media text content to classify a brand and categorize sentiment towards the brand as positive, negative, neutral, or mixed (\cite{alessia2015approaches, anupama2020real, vidya2015twitter}). The objective is to train a model using the Sentiment140 dataset to classify sentiment of textual tweets (\cite{go2009twitter, pak2010twitter}). We experiment with ML algorithms like Naïve Bayes and Logistic Regression to find the best fit (\cite{howard2018universal}). Ultimately, the proposed system will allow businesses to quickly react to shifts in public sentiment and maintain a positive brand image (\cite{vidya2015twitter, petasis2013large, ducange2019effective}). \\
 \\
-\textbf{Related Course Topics.} This project will cover various course topics, including Natural Language Processing, Classification, Regression, Supervised Machine Learning, Bayesian Networks, and Deep Learning (\cite{liu2020aspect, socher2013recursive}).\\
+\textbf{Related Course Topics.} This project will cover various course topics, including Natural Language Processing, Supervised Machine Learning, Classification, Regression, Bayesian Networks, and Deep Learning (\cite{severyn2015twitter, liu2020aspect, socher2013recursive}).\\
 \\
-\textbf{Algorithms.} For this problem, the primary machine learning algorithms for consideration are Naïve Bayes, Logistic Regression, Support Vector Machines, Recurrent Neural Networks, and Transformers (like BERT) (\cite{severyn2015twitter}).\\
+\textbf{Algorithms.} For this problem, the primary machine learning algorithms for consideration are Naïve Bayes, Logistic Regression, Support Vector Machines, Recurrent Neural Networks, and Transformers (like BERT) (\cite{DBLP:journals/corr/abs-1810-04805}).\\
 \\
 \textbf{Problem.} Given brand names $b_1 = \texttt{Nike}, b_2 = \texttt{Google}, b_3 = \texttt{Disney}, \dots, b_j \in B$ and Twitter posts
 \begin{align*}
@@ -168,13 +168,13 @@ when the post expresses sentiment towards the brand, or $\texttt{No-Sentiment}$ 
      & \mathrm{BrandSentimentAnalyzer}(p_3, b_3) \rightarrow (s^{-}, 0.82)
 \end{align*}
 \\
-\textbf{Methodology.} The work is divided into three stages: assessment, development, and evaluation. The process is circular---each stage informs and refines previous stages, creating a feedback loop that continuously improves the overall system (\cite{ducange2019effective, colleoni2011measuring}).\\
+\textbf{Methodology.} The work is divided into three stages: assessment, development, and evaluation. The process is circular---each stage informs and refines previous stages, creating a feedback loop that continuously improves the overall system.\\
 
 \begin{enumerate}[leftmargin=*]
 
     \item \textbf{Assessment.} The stage involves analyzing the dataset and selecting and testing appropriate models. The specific requirements of the sentiment analysis task, the characteristics of the available data, and the nature of the problem guide this selection process.
 
-    \item \textbf{Development.} This process involves handling invalid values and discarding non-textual content such as images, videos, or audio (\cite{ducange2019effective}). Automation ensures efficiency in this process. The selected models are trained to identify a brand or align with the sentiment expressed in a tweet, and then tuned to improve performance.
+    \item \textbf{Development.} This process involves handling invalid values and discarding non-textual content such as images, videos, or audio. Automation ensures efficiency in this process. The selected models are trained to identify a brand or align with the sentiment expressed in a tweet, and then tuned to improve performance.
 
     \item \textbf{Evaluation.} This stage measures the models' ability to identify brands and predict sentiment in Twitter posts. The tweets used for validation can come from a test set partitioned from the original dataset, as well as from the Twitter API. Standard classification metrics such as Accuracy, Precision, Recall, and F1 Score are used to evaluate the models. The models are then ranked by performance.
 
