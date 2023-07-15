@@ -115,8 +115,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: true
           PRERELEASE: true
-        with:
-          default_bump: minor
+          DEFAULT_BUMP: minor
 
       - name: Upload to Vimeo via Python API
         run: |
