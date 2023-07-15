@@ -124,7 +124,7 @@ jobs:
             owner: context.repo.owner,
             repo: context.repo.repo,
             body: `Workflow Artifacts (PDFs/video): <${artifact_url}>.
-            Vimeo link: <${vimeo_url}>.`
+            Vimeo Link: <${vimeo_url}>.`
           });
       env:
         VIMEO_VIDEO_ID: ${{ secrets.VIMEO_VIDEO_ID }}
