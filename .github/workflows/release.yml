@@ -11,7 +11,6 @@ concurrency:
 
 permissions:
   contents: write
-  packages: read
 
 jobs:
   release:
@@ -23,6 +22,22 @@ jobs:
         with:
           ref: main
           fetch-depth: '0'
+
+      - name: Cache pip packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Cache apt packages
+        uses: actions/cache@v3
+        with:
+          path: /var/cache/apt/archives
+          key: ${{ runner.os }}-apt-${{ hashFiles('/etc/apt/sources.list') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-
 
       - name: Generate PDFs
         shell: bash
@@ -58,25 +73,6 @@ jobs:
             popd > /dev/null
           done
 
-      - name: Cache pip packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Cache apt packages
-        uses: actions/cache@v3
-        with:
-          path: /var/cache/apt/archives
-          key: ${{ runner.os }}-apt-${{ hashFiles('/etc/apt/sources.list') }}
-          restore-keys: |
-            ${{ runner.os }}-apt-
-
-      - name: Decode Google Application Credentials
-        run: echo "${{ secrets.KEYFILE }}" | base64 --decode > keyfile.json
-
       - name: Generate Video
         id: generate-video
         shell: bash
@@ -101,6 +97,7 @@ jobs:
           rm -f ${{ vars.PROJECT }}.mp4
 
           # GENERATE VIDEO WITH PROFESSIONAL VOICEOVER
+          echo "${{ secrets.KEYFILE }}" | base64 --decode > keyfile.json
           python3 pptx2video.py ${{ vars.PROJECT }}.pptx --keyfile keyfile.json
 
           # GET TOTAL VIDEO DURATION
@@ -121,17 +118,6 @@ jobs:
         with:
           default_bump: minor
 
-      - name: Push Artifacts to Main
-        run: |
-          git config --global user.name 'GitHub Actions'
-          git config --global user.email 'github-actions@github.com'
-          git config --global --add safe.directory /__w/project/project
-          git add **/*.pdf
-          git add assets
-          git add ${{ vars.PROJECT }}.mp4
-          git commit -m "Add assets and video"
-          git push --force
-
       - name: Upload to Vimeo via Python API
         run: |
           python3 -m pip install --upgrade pip
@@ -151,6 +137,7 @@ jobs:
             ${{ vars.PROPOSAL }}.pdf
             ${{ vars.REPORT }}.pdf
             ${{ vars.PROJECT }}.mp4
+          tag_name: ${{ steps.tag_version.outputs.new_tag }}
           body: |
             DELIVERABLES:
               - [${{ vars.PROPOSAL }}.pdf](${{ vars.DOWNLOAD_URI }}/${{ steps.tag_version.outputs.new_tag }}/${{ vars.PROPOSAL }}.pdf)

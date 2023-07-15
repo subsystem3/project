@@ -10,7 +10,6 @@ concurrency:
 
 permissions:
   contents: write
-  packages: read
   issues: write
   pull-requests: write
 
@@ -96,9 +95,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-apt-
 
-      - name: Decode Google Application Credentials
-        run: echo "${{ secrets.KEYFILE }}" | base64 --decode > keyfile.json
-
       - name: Generate Video
         id: generate-video
         shell: bash
@@ -123,6 +119,7 @@ jobs:
           rm -f ${{ vars.PROJECT }}.mp4
 
           # GENERATE VIDEO WITH PROFESSIONAL VOICEOVER
+          echo "${{ secrets.KEYFILE }}" | base64 --decode > keyfile.json
           python3 pptx2video.py ${{ vars.PROJECT }}.pptx --keyfile keyfile.json
 
           # GET TOTAL VIDEO DURATION
