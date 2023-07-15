@@ -36,33 +36,37 @@ jobs:
             base=$(basename "$file")
             base_no_ext="${base%.*}"
             pushd "$dir" > /dev/null
+
             # DELETE OLD PDF IF IT EXISTS
             rm -f "${base_no_ext}.pdf"
+
             # BUILD PDF
             pdflatex -interaction=nonstopmode "$base"
+
             # CLEAN
             rm -f *.aux *.log *.out *.toc *.fdb_latexmk *.fls *.synctex.gz *.bbl *.run.xml
+
             # RETURN TO ORIGINAL DIRECTORY
             popd > /dev/null
           done
 
-      - name: Push PDFs to main
-        run: |
-          git config --global user.name 'GitHub Actions'
-          git config --global user.email 'github-actions@github.com'
-          git add **/*.pdf
-          git commit -m "Add generated PDFs"
-          git push
+      - name: Upload PDF Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: pdfs
+          path: |
+            ${{ vars.PROPOSAL }}.pdf
+            ${{ vars.REPORT }}.pdf
 
   build-video:
     runs-on: ubuntu-latest
     outputs:
       duration: ${{ steps.generate-video.outputs.duration }}
     steps:
-      - name: Check out main branch
+      - name: Check out dev branch
         uses: actions/checkout@v3
         with:
-          ref: main
+          ref: dev
           fetch-depth: '2'
 
       - name: Cache pip packages
@@ -86,42 +90,19 @@ jobs:
 
       - name: Generate Video
         id: generate-video
-        run: |
-          # install dependencies
-          sudo apt-get update
-          sudo apt-get -y install \
-            ffmpeg \
-            libreoffice \
-            poppler-utils \
-            bc
+        shell: bash
+        run: ./generate_video.sh $GITHUB_SHA_BEFORE $GITHUB_SHA_AFTER ${{ vars.PROJECT }}
+        env:
+          GITHUB_SHA_BEFORE: ${{ github.event.before }}
+          GITHUB_SHA_AFTER: ${{ github.event.after }}
 
-          python3 -m pip install --upgrade pip
-          python3 -m pip install \
-            gTTS  \
-            moviepy \
-            pdf2image  \
-            python-pptx
-
-          # generate video
-          python3 pptx2video.py ${{ vars.PROJECT }}.pptx
-
-          # get total video duration
-          total_seconds=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ${{ vars.PROJECT }}.mp4)
-          hours=$(bc <<< "${total_seconds}/3600")
-          minutes=$(bc <<< "(${total_seconds}%3600)/60")
-          seconds=$(printf "%.0f" $(bc <<< "${total_seconds}%60"))
-          humanized_duration="${hours}h ${minutes}m ${seconds}s"
-          echo "duration=$humanized_duration" >> "$GITHUB_OUTPUT"
-
-      - name: Push video and assets (used to make video) to main
-        run: |
-          git config --global user.name 'GitHub Actions'
-          git config --global user.email 'github-actions@github.com'
-          git config --global --add safe.directory /__w/project/project
-          git add assets
-          git add **/*.mp4
-          git commit -m "Add assets and video"
-          git push
+      - name: Upload Video Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: video
+          path: |
+            assets
+            ${{ vars.PROJECT }}.mp4
 
   release:
     if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
@@ -134,6 +115,30 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.merge_commit_sha }}
           fetch-depth: '0'
+
+      - name: Download PDF artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: pdfs
+
+      - name: Remove old assets folder
+        run: rm -rf assets
+
+      - name: Download video artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: video
+
+      - name: Push Artifacts to Main
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'github-actions@github.com'
+          git config --global --add safe.directory /__w/project/project
+          git add **/*.pdf
+          git add assets
+          git add **/*.mp4
+          git commit -m "Add assets and video"
+          git push
 
       - name: Upload to Vimeo via Python API
         run: |
