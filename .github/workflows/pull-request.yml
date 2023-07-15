@@ -122,14 +122,6 @@ jobs:
           echo "${{ secrets.KEYFILE }}" | base64 --decode > keyfile.json
           python3 pptx2video.py ${{ vars.PROJECT }}.pptx --keyfile keyfile.json
 
-          # GET TOTAL VIDEO DURATION
-          total_seconds=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ${{ vars.PROJECT }}.mp4)
-          hours=$(bc <<< "${total_seconds}/3600")
-          minutes=$(bc <<< "(${total_seconds}%3600)/60")
-          seconds=$(printf "%.0f" $(bc <<< "${total_seconds}%60"))
-          humanized_duration="${hours}h ${minutes}m ${seconds}s"
-          echo "duration=$humanized_duration" >> "$GITHUB_OUTPUT"
-
       - name: Upload to Vimeo via Python API
         run: |
           python3 -m pip install --upgrade pip
