@@ -93,8 +93,8 @@ jobs:
         shell: bash
         run: ./generate_video.sh $GITHUB_SHA_BEFORE $GITHUB_SHA_AFTER ${{ vars.PROJECT }}
         env:
-          GITHUB_SHA_BEFORE: ${{ github.event.before }}
-          GITHUB_SHA_AFTER: ${{ github.event.after }}
+          GITHUB_SHA_BEFORE: ${{ github.event.pull_request.base.sha }}
+          GITHUB_SHA_AFTER: ${{ github.event.pull_request.head.sha }}
 
       - name: Upload Video Artifact
         uses: actions/upload-artifact@v3
