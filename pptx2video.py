@@ -142,8 +142,8 @@ class PPTXtoVideo:
         Args:
             videos (List[AudioFileClip]): List of video clips.
         """
-        intro_clip = VideoFileClip("stock/intro.mp4")
-        intro_clip = intro_clip.resize((1920, 1080))
+        intro_clip = VideoFileClip("stock/intro.mp4", target_resolution=(1080, 1920))
+        intro_clip = intro_clip.resize((1080, 1920))
         # 1 second fade out and fade in
         intro_clip = crossfadeout(intro_clip, 1)
         videos[0] = crossfadein(videos[0], 1)
