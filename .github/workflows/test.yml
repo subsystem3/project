@@ -35,15 +35,31 @@ jobs:
       image: texlive/texlive:latest
     steps:
       - name: Check out dev branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3.5.3
         with:
           ref: dev
           fetch-depth: '0'
 
-      - uses: xu-cheng/latex-action@v2
-        with:
-          root_file: "*.tex"
-          glob_root_file: true
+      - name: Generate PDFs
+        shell: bash
+        run: |
+          # LOOK FOR .tex ONLY IN CURRENT WORKING DIRECTORY
+          for file in *.tex
+          do
+            # CHANGE DIRECTORY DUE TO RELATIVE PATHS IN BUILDING
+            dir=$(dirname "$file")
+            base=$(basename "$file")
+            base_no_ext="${base%.*}"
+            pushd "$dir" > /dev/null
+            # DELETE OLD PDF IF IT EXISTS
+            rm -f "${base_no_ext}.pdf"
+            # BUILD PDF
+            pdflatex -interaction=nonstopmode "$base"
+            # CLEAN
+            rm -f *.aux *.log *.out *.toc *.fdb_latexmk *.fls *.synctex.gz *.bbl *.run.xml
+            # RETURN TO ORIGINAL DIRECTORY
+            popd > /dev/null
+          done
 
       - name: Upload PDF Artifacts
         uses: actions/upload-artifact@v3
