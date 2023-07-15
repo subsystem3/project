@@ -107,8 +107,8 @@ jobs:
       - name: Generate Video
         run: |
           # check for changes in PowerPoint and assets
-          pptx_changed=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep '\.pptx$')
-          assets_changed=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep '^assets/')
+          pptx_changed=$(git diff --name-only $GITHUB_SHA_BEFORE $GITHUB_SHA_AFTER | grep '\.pptx$')
+          assets_changed=$(git diff --name-only $GITHUB_SHA_BEFORE $GITHUB_SHA_AFTER | grep '^assets/')
 
           if [ -n "$pptx_changed" ] || [ -n "$assets_changed" ]; then
             # install dependencies
@@ -129,6 +129,9 @@ jobs:
             # generate video
             python3 pptx2video.py ${{ vars.PROJECT }}.pptx
           fi
+        env:
+          GITHUB_SHA_BEFORE: ${{ github.event.before }}
+          GITHUB_SHA_AFTER: ${{ github.event.after }}
 
       - name: Upload to Vimeo via Python API
         run: |
