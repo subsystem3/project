@@ -4,6 +4,7 @@ import shutil
 import subprocess
 from typing import List
 
+import cv2
 import numpy as np
 from google.cloud import texttospeech as tts
 from gtts import gTTS
@@ -105,7 +106,7 @@ class PPTXtoVideo:
         Converts the .pptx file to a .pdf file using LibreOffice.
         """
         cmd = f"libreoffice --headless --convert-to pdf {self.pptx_filename}"
-        subprocess.run(cmd, shell=True, check=True)
+        subprocess.run(cmd, shell=True, check=True, env={"PATH": "/usr/bin"})
 
     def create_videos(self) -> List[AudioFileClip]:
         """
@@ -126,11 +127,13 @@ class PPTXtoVideo:
             voice_filename = f"{assets_dir}/voice_{i}.wav"
             self.text_to_wav(text, voice_filename)
             audio = AudioFileClip(voice_filename)
-            # Create a silent audio clip of 0.5 seconds
+
+            # CREATE 0.5s SILENCE AT BEGINNING AND END OF AUDIO (1s TOTAL BETWEEN SLIDES)
             silence = AudioArrayClip(np.array([[0], [0]]), fps=44100).set_duration(0.5)
-            # Add silence to the beginning and end of the audio
             audio = concatenate_audioclips([silence, audio, silence])
+
             img_clip = ImageClip(f"{assets_dir}/slide_{i}.png", duration=audio.duration)
+            img_clip.resize(height=1080)
             video = img_clip.set_audio(audio)
             videos.append(video)
         return videos
@@ -142,13 +145,11 @@ class PPTXtoVideo:
         Args:
             videos (List[AudioFileClip]): List of video clips.
         """
-        intro_clip = VideoFileClip("stock/intro.mp4", target_resolution=(1080, 1920))
-        intro_clip = intro_clip.resize((1080, 1920))
-        # 1 second fade out and fade in
+        intro_clip = VideoFileClip("stock/intro.mp4")
         intro_clip = crossfadeout(intro_clip, 1)
         videos[0] = crossfadein(videos[0], 1)
         videos.insert(0, intro_clip)
-        final_clip = concatenate_videoclips(videos, method="compose")
+        final_clip = concatenate_videoclips(videos)
         final_clip.write_videofile(self.output_file, fps=24)
 
     def convert(self):
@@ -163,18 +164,16 @@ class PPTXtoVideo:
 
 def main():
     """
-    Main function to test the PPTXtoVideo class.
+    Parse command line arguments and convert PowerPoint to video.
     """
     parser = argparse.ArgumentParser(
         description="Convert a PowerPoint presentation to a video."
     )
-
     parser.add_argument(
         "pptx",
         type=str,
         help="The name of the PowerPoint file to convert.",
     )
-
     parser.add_argument(
         "--keyfile",
         type=str,
@@ -183,7 +182,6 @@ def main():
     )
 
     args = parser.parse_args()
-
     if args.keyfile:
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = args.keyfile
 
