@@ -122,7 +122,8 @@ jobs:
               gTTS  \
               moviepy \
               pdf2image  \
-              python-pptx
+              python-pptx \
+              google-cloud-texttospeech
 
           # REMOVE OLD VIDEO
           rm -f ${{ vars.PROJECT }}.mp4
