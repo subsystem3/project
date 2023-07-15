@@ -114,7 +114,8 @@ jobs:
               pdf2image  \
               python-pptx \
               google-cloud-texttospeech \
-              numpy
+              numpy \
+              pillow==6.2.2
 
           # REMOVE OLD VIDEO
           rm -f ${{ vars.PROJECT }}.mp4
