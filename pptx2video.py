@@ -143,15 +143,17 @@ def main():
     )
 
     parser.add_argument(
-        "pptx",
+        "--pptx",
         type=str,
         help="The name of the PowerPoint file to convert.",
+        required=True,
     )
 
     parser.add_argument(
         "--keyfile",
         type=str,
-        help="The path to the Google service account json file.",
+        help="The path to the Google service account JSON file.",
+        required=False,
     )
 
     args = parser.parse_args()
