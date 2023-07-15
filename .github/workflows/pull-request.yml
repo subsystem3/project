@@ -11,12 +11,28 @@ concurrency:
 permissions:
   contents: write
   packages: read
+  issues: write
+  pull-requests: write
 
 jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v3
+        with:
+          ref: dev
+          fetch-depth: '0'
+
+      - name: Bump version and push tag
+        uses: anothrNick/github-tag-action@1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+          DEFAULT_BUMP: minor
+
   build-pdfs:
     runs-on: ubuntu-latest
-    container:
-      image: texlive/texlive:latest
     steps:
       - name: Check out dev branch
         uses: actions/checkout@v3.5.3
@@ -24,44 +40,13 @@ jobs:
           ref: dev
           fetch-depth: '0'
 
-      - name: Generate PDFs
-        shell: bash
-        run: |
-          # LOOK FOR .tex ONLY IN CURRENT WORKING DIRECTORY
-          for file in *.tex
-          do
-            # CHANGE DIRECTORY DUE TO RELATIVE PATHS IN BUILDING
-            dir=$(dirname "$file")
-            base=$(basename "$file")
-            base_no_ext="${base%.*}"
-            pushd "$dir" > /dev/null
-
-            # DELETE OLD PDF IF IT EXISTS
-            rm -f "${base_no_ext}.pdf"
-
-            # BUILD PDF
-            pdflatex -interaction=nonstopmode "$base"
-
-            # CLEAN
-            rm -f *.aux *.log *.out *.toc *.fdb_latexmk *.fls
-
-            # RETURN TO ORIGINAL DIRECTORY
-            popd > /dev/null
-          done
-
-      - name: Comment PDFs
-        run: |
-          PR_ID=$(echo ${{ github.event.pull_request.number }})
-          COMMENT_ENDPOINT="/repos/${{ github.repository }}/issues/$PR_ID/comments"
-          for pdf_file in pdfs/*; do
-            BASE64_PDF=$(base64 $pdf_file)
-            PAYLOAD=$(echo -n '{ "body": "'$BASE64_PDF'" }' | base64)
-            curl -sSL \
-              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-              -H "Content-Type: application/json
+      - uses: xu-cheng/latex-action@v2
+        with:
+          root_file: "*.tex"
+          glob_root_file: true
 
       - name: Upload PDF Artifacts to workflow run
-        uses: actions/upload-artifact@v3.1.2
+        uses: actions/upload-artifact@v3
         with:
           name: pdfs
           path: |
@@ -73,13 +58,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out dev branch
-        uses: actions/checkout@v3.5.3
+        uses: actions/checkout@v3
         with:
           ref: dev
-          fetch-depth: '0'
+          fetch-depth: '2'
 
       - name: Cache pip packages
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v3
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
@@ -90,7 +75,7 @@ jobs:
         run: sudo chown -R $(whoami) /var/cache/apt/archives
 
       - name: Cache apt packages
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v3
         with:
           path: /var/cache/apt/archives
           key: ${{ runner.os }}-apt-${{ hashFiles('/etc/apt/sources.list') }}
@@ -98,24 +83,11 @@ jobs:
             ${{ runner.os }}-apt-
 
       - name: Generate Video
-        run: |
-          # install dependencies
-          sudo apt-get update
-          sudo apt-get -y install \
-            ffmpeg \
-            libreoffice \
-            poppler-utils \
-            bc
-
-          python3 -m pip install --upgrade pip
-          python3 -m pip install \
-            gTTS  \
-            moviepy \
-            pdf2image  \
-            python-pptx
-
-          # generate video
-          python3 pptx2video.py ${{ vars.PROJECT }}.pptx
+        shell: bash
+        run: ./generate_video.sh $GITHUB_SHA_BEFORE $GITHUB_SHA_AFTER ${{ vars.PROJECT }}
+        env:
+          GITHUB_SHA_BEFORE: ${{ github.event.before }}
+          GITHUB_SHA_AFTER: ${{ github.event.after }}
 
       - name: Upload to Vimeo via Python API
         run: |
@@ -130,27 +102,10 @@ jobs:
           VIDEO_PATH: ${{ vars.PROJECT }}.mp4
 
       - name: Upload Video Artifact
-        uses: actions/upload-artifact@v3.1.2
+        uses: actions/upload-artifact@v3
         with:
           name: video
           path: ${{ vars.PROJECT }}.mp4
-
-  tag:
-    needs: [build-pdfs, build-video]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out branch
-        uses: actions/checkout@v3.5.3
-        with:
-          ref: dev
-          fetch-depth: '0'
-
-      - name: Bump version and push tag
-        uses: anothrNick/github-tag-action@1.67.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          WITH_V: true
-          DEFAULT_BUMP: minor
 
   comment-pr:
     needs: [build-pdfs, build-video, tag]
@@ -158,20 +113,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Comment PR
-      uses: actions/github-script@v5
+      uses: actions/github-script@v6
       with:
         script: |
           const issue_number = context.payload.pull_request.number;
-          const artifact_url = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+          const artifact_url = `${context.payload.repository.html_url}/actions/runs/${context.runId}`;
           const vimeo_url = `https://vimeo.com/${process.env.VIMEO_VIDEO_ID}`;
           github.rest.issues.createComment({
+            issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
-            issue_number: issue_number,
-            body: `Inspect generated artifacts [here](${artifact_url}). If video generation was successful, it will be available on [here](${vimeo_url}).`
+            body: `Workflow Artifacts (Video/PDFs)
+            <${artifact_url}>
+
+            Vimeo Link
+            <${vimeo_url}>`
+
           });
       env:
-        VIMEO_CLIENT_ID: ${{ secrets.VIMEO_CLIENT_ID }}
-        VIMEO_CLIENT_SECRET: ${{ secrets.VIMEO_CLIENT_SECRET }}
-        VIMEO_ACCESS_TOKEN: ${{ secrets.VIMEO_ACCESS_TOKEN }}
         VIMEO_VIDEO_ID: ${{ secrets.VIMEO_VIDEO_ID }}
