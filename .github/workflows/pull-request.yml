@@ -44,28 +44,10 @@ jobs:
 
       - name: Generate PDFs
         shell: bash
-        run: |
-          # LOOK FOR .tex ONLY IN CURRENT WORKING DIRECTORY
-          for file in *.tex
-          do
-            # CHANGE DIRECTORY DUE TO RELATIVE PATHS IN BUILDING
-            dir=$(dirname "$file")
-            base=$(basename "$file")
-            base_no_ext="${base%.*}"
-            pushd "$dir" > /dev/null
-
-            # DELETE OLD PDF IF IT EXISTS
-            rm -f "${base_no_ext}.pdf"
-
-            # BUILD PDF
-            pdflatex -interaction=nonstopmode "$base"
-
-            # CLEAN
-            rm -f *.aux *.log *.out *.toc *.fdb_latexmk *.fls
-
-            # RETURN TO ORIGINAL DIRECTORY
-            popd > /dev/null
-          done
+        run: ./generate_video.sh $GITHUB_SHA_BEFORE $GITHUB_SHA_AFTER ${{ vars.PROJECT }}
+        env:
+          GITHUB_SHA_BEFORE: ${{ github.event.before }}
+          GITHUB_SHA_AFTER: ${{ github.event.after }}
 
       - name: Upload PDF Artifacts to workflow run
         uses: actions/upload-artifact@v3.1.2
@@ -105,30 +87,8 @@ jobs:
             ${{ runner.os }}-apt-
 
       - name: Generate Video
-        run: |
-          # check for changes in PowerPoint and assets
-          pptx_changed=$(git diff --name-only $GITHUB_SHA_BEFORE $GITHUB_SHA_AFTER | grep '\.pptx$')
-          assets_changed=$(git diff --name-only $GITHUB_SHA_BEFORE $GITHUB_SHA_AFTER | grep '^assets/')
-
-          if [ -n "$pptx_changed" ] || [ -n "$assets_changed" ]; then
-            # install dependencies
-            sudo apt-get update
-            sudo apt-get -y install \
-              ffmpeg \
-              libreoffice \
-              poppler-utils \
-              bc
-
-            python3 -m pip install --upgrade pip
-            python3 -m pip install \
-              gTTS  \
-              moviepy \
-              pdf2image  \
-              python-pptx
-
-            # generate video
-            python3 pptx2video.py ${{ vars.PROJECT }}.pptx
-          fi
+        shell: bash
+        run: ./generate_video.sh $GITHUB_SHA_BEFORE $GITHUB_SHA_AFTER ${{ vars.PROJECT }}
         env:
           GITHUB_SHA_BEFORE: ${{ github.event.before }}
           GITHUB_SHA_AFTER: ${{ github.event.after }}
