@@ -153,12 +153,6 @@ jobs:
           VIMEO_VIDEO_ID: ${{ secrets.VIMEO_VIDEO_ID }}
           VIDEO_PATH: ${{ vars.PROJECT }}.mp4
 
-      - name: Upload Video Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: video
-          path: ${{ vars.PROJECT }}.mp4
-
   comment-pr:
     needs: [build-pdfs, build-video, tag]
     environment: pull_request
@@ -175,7 +169,7 @@ jobs:
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
-            body: `Workflow Artifacts (Video/PDFs)
+            body: `PDFs
             <${artifact_url}>
 
             Vimeo Link

@@ -65,14 +65,6 @@ jobs:
             popd > /dev/null
           done
 
-      - name: Upload PDF Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: pdfs
-          path: |
-            ${{ vars.REPORT }}.pdf
-            ${{ vars.PROPOSAL }}.pdf
-
   build-video:
     environment: test
     runs-on: ubuntu-latest
@@ -138,12 +130,6 @@ jobs:
           seconds=$(printf "%.0f" $(bc <<< "${total_seconds}%60"))
           humanized_duration="${hours}h ${minutes}m ${seconds}s"
           echo "duration=$humanized_duration" >> "$GITHUB_OUTPUT"
-
-      - name: Upload Video Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: video
-          path: ${{ vars.PROJECT }}.mp4
 
       - name: Upload to Vimeo via Python API
         run: |
