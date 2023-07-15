@@ -59,7 +59,7 @@ jobs:
             pdflatex -interaction=nonstopmode "$base"
 
             # CLEAN
-            rm -f *.aux *.log *.out *.toc *.fdb_latexmk *.fls
+            rm -f *.aux *.log *.out *.toc *.fdb_latexmk *.fls *.bbl *.run.xml
 
             # RETURN TO ORIGINAL DIRECTORY
             popd > /dev/null
