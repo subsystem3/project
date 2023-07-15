@@ -59,9 +59,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: Change ownership of apt archives
-        run: sudo chown -R $(whoami) /var/cache/apt/archives
-
       - name: Cache apt packages
         uses: actions/cache@v3
         with:
