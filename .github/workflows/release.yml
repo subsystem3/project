@@ -163,7 +163,7 @@ jobs:
           git add assets
           git add ${{ vars.PROJECT }}.mp4
           git commit -m "Add assets and video"
-          git push
+          git push --force
 
       - name: Upload to Vimeo via Python API
         run: |
