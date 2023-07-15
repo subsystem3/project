@@ -14,7 +14,8 @@ permissions:
   packages: read
 
 jobs:
-  build-pdfs:
+  release:
+    environment: production
     runs-on: ubuntu-latest
     container:
       image: texlive/texlive:latest
@@ -50,25 +51,6 @@ jobs:
             popd > /dev/null
           done
 
-      - name: Upload PDF Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: pdfs
-          path: |
-            ${{ vars.PROPOSAL }}.pdf
-            ${{ vars.REPORT }}.pdf
-
-  build-video:
-    runs-on: ubuntu-latest
-    outputs:
-      duration: ${{ steps.generate-video.outputs.duration }}
-    steps:
-      - name: Check out main branch
-        uses: actions/checkout@v3
-        with:
-          ref: main
-          fetch-depth: '0'
-
       - name: Cache pip packages
         uses: actions/cache@v3
         with:
@@ -88,6 +70,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-apt-
 
+      - name: Decode Google Application Credentials
+        run: echo "${{ secrets.KEYFILE }}" | base64 --decode > keyfile.json
+
       - name: Generate Video
         id: generate-video
         shell: bash
@@ -105,13 +90,14 @@ jobs:
               gTTS  \
               moviepy \
               pdf2image  \
-              python-pptx
+              python-pptx \
+              google-cloud-texttospeech
 
           # REMOVE OLD VIDEO
           rm -f ${{ vars.PROJECT }}.mp4
 
-          # GENERATE VIDEO
-          python3 pptx2video.py ${{ vars.PROJECT }}.pptx
+          # GENERATE VIDEO WITH PROFESSIONAL VOICEOVER
+          python3 pptx2video.py ${{ vars.PROJECT }}.pptx --keyfile keyfile.json
 
           # GET TOTAL VIDEO DURATION
           total_seconds=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ${{ vars.PROJECT }}.mp4)
@@ -121,55 +107,15 @@ jobs:
           humanized_duration="${hours}h ${minutes}m ${seconds}s"
           echo "duration=$humanized_duration" >> "$GITHUB_OUTPUT"
 
-      - name: Upload Video Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: video
-          path: |
-            assets
-            ${{ vars.PROJECT }}.mp4
-
-  tag:
-    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
-    needs: [build-pdfs, build-video]
-    runs-on: ubuntu-latest
-    outputs:
-      new_tag: ${{ steps.tag_version.outputs.new_tag }}
-    steps:
       - name: Bump version and push tag
         id: tag_version
-        uses: anothrNick/github-tag-action@1
+        uses: anothrNick/github-tag-action@1.67.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: true
           PRERELEASE: true
         with:
           default_bump: minor
-
-  release:
-    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
-    needs: [tag, build-pdfs, build-video]
-    environment: production
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out main branch
-        uses: actions/checkout@v3
-        with:
-          ref: main
-          fetch-depth: '0'
-
-      - name: Download PDF artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: pdfs
-
-      - name: Remove old assets folder
-        run: rm -rf assets
-
-      - name: Download video artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: video
 
       - name: Push Artifacts to Main
         run: |
@@ -194,31 +140,20 @@ jobs:
           VIMEO_VIDEO_ID: ${{ secrets.VIMEO_VIDEO_ID }}
           VIDEO_PATH: ${{ vars.PROJECT }}.mp4
 
-      - name: Bump version and push tag
-        id: tag_version
-        uses: anothrNick/github-tag-action@1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          WITH_V: true
-          PRERELEASE: true
-        with:
-          default_bump: minor
-
       - name: Release
         uses: softprops/action-gh-release@v0.1.15
         with:
-          tag_name: ${{ needs.tag.outputs.new_tag }}
           files: |
             ${{ vars.PROPOSAL }}.pdf
             ${{ vars.REPORT }}.pdf
             ${{ vars.PROJECT }}.mp4
           body: |
             DELIVERABLES:
-              - [${{ vars.PROPOSAL }}.pdf](${{vars.DOWNLOAD_URI}}/${{ needs.tag.outputs.new_tag }}/${{ vars.PROPOSAL }}.pdf)
-              - [${{ vars.REPORT }}.pdf](${{vars.DOWNLOAD_URI}}/${{ needs.tag.outputs.new_tag }}/${{ vars.REPORT }}.pdf)
-              - [${{ vars.PROJECT }}.mp4](${{vars.DOWNLOAD_URI}}/${{ needs.tag.outputs.new_tag }}/${{ vars.PROJECT }}.mp4)
+              - [${{ vars.PROPOSAL }}.pdf](${{ vars.DOWNLOAD_URI }}/${{ steps.tag_version.outputs.new_tag }}/${{ vars.PROPOSAL }}.pdf)
+              - [${{ vars.REPORT }}.pdf](${{ vars.DOWNLOAD_URI }}/${{ steps.tag_version.outputs.new_tag }}/${{ vars.REPORT }}.pdf)
+              - [${{ vars.PROJECT }}.mp4](${{ vars.DOWNLOAD_URI }}/${{ steps.tag_version.outputs.new_tag }}/${{ vars.PROJECT }}.mp4)
 
-            VIDEO DURATION: ${{ needs.build-video.outputs.duration }}
+            VIDEO DURATION: ${{ steps.generate-video.outputs.duration }}
 
             VIDEO LINK: <https://vimeo.com/${{ secrets.VIMEO_VIDEO_ID }}/2f1e66d926>
 

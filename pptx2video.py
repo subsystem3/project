@@ -5,9 +5,13 @@ import subprocess
 from typing import List
 
 from gtts import gTTS
+from google.cloud import texttospeech as tts
 from moviepy.editor import AudioFileClip, ImageClip, concatenate_videoclips
 from pdf2image import convert_from_path
 from pptx import Presentation
+
+
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "su23-aai500-group2-456f51963ea0.json"
 
 
 class PPTXtoVideo:
@@ -24,6 +28,30 @@ class PPTXtoVideo:
         self.voiceover_texts = [
             slide.notes_slide.notes_text_frame.text for slide in self.slides
         ]
+
+    def text_to_wav(self, text: str, filename: str, voice_name: str = "en-US-Studio-M"):
+        if "GOOGLE_APPLICATION_CREDENTIALS" in os.environ:
+            # Use Google Cloud Text-to-Speech
+            language_code = "-".join(voice_name.split("-")[:2])
+            text_input = tts.SynthesisInput(text=text)
+            voice_params = tts.VoiceSelectionParams(
+                language_code=language_code, name=voice_name
+            )
+            audio_config = tts.AudioConfig(audio_encoding=tts.AudioEncoding.LINEAR16)
+            client = tts.TextToSpeechClient()
+
+            response = client.synthesize_speech(
+                input=text_input,
+                voice=voice_params,
+                audio_config=audio_config,
+            )
+
+            with open(filename, "wb") as out:
+                out.write(response.audio_content)
+        else:
+            # Use gTTS
+            voice = gTTS(text=text, lang="en", slow=False)
+            voice.save(filename)
 
     def format_duration(self, duration: int) -> str:
         """
@@ -72,13 +100,13 @@ class PPTXtoVideo:
         if os.path.exists(assets_dir):
             shutil.rmtree(assets_dir)
         os.makedirs(assets_dir, exist_ok=True)
-        for i, slide in enumerate(self.slides):
+        for i, _ in enumerate(self.slides):
             text = self.voiceover_texts[i]
             images = convert_from_path(self.pdf_filename, dpi=300)
             images[i].save(f"{assets_dir}/slide_{i}.png", "PNG")
-            voice = gTTS(text=text, lang="en", slow=False)
-            voice.save(f"{assets_dir}/voice_{i}.mp3")
-            audio = AudioFileClip(f"{assets_dir}/voice_{i}.mp3")
+            voice_filename = f"{assets_dir}/voice_{i}.wav"
+            self.text_to_wav(text, voice_filename)
+            audio = AudioFileClip(voice_filename)
             img_clip = ImageClip(
                 f"{assets_dir}/slide_{i}.png", duration=audio.duration + 1
             )
@@ -120,7 +148,18 @@ def main():
         help="The name of the PowerPoint file to convert.",
     )
 
+    parser.add_argument(
+        "--keyfile",
+        type=str,
+        help="The path to the Google service account JSON file.",
+        required=False,
+    )
+
     args = parser.parse_args()
+
+    if args.keyfile:
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = args.keyfile
+
     PPTXtoVideo(args.pptx).convert()
 
 

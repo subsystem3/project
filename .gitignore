@@ -174,3 +174,5 @@ cython_debug/
 
 # USE WORKFLOW TO GENERATE PDFs
 *.pdf
+
+keyfile.json
