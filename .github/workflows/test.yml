@@ -104,10 +104,10 @@ jobs:
 
       - name: Generate Video
         shell: bash
-        run: ./generate_video.sh $GITHUB_SHA_BEFORE $GITHUB_SHA_AFTER ${{ vars.PROJECT }}
+        run: ./generate_video.sh $BEFORE $AFTER ${{ vars.PROJECT }}
         env:
-          GITHUB_SHA_BEFORE: ${{ github.event.before }}
-          GITHUB_SHA_AFTER: ${{ github.event.after }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.event.after }}
 
       - name: Upload Video Artifact
         uses: actions/upload-artifact@v3
