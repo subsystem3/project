@@ -103,30 +103,8 @@ jobs:
             ${{ runner.os }}-apt-
 
       - name: Generate Video
-        run: |
-          # check for changes in PowerPoint and assets
-          pptx_changed=$(git diff --name-only $GITHUB_SHA_BEFORE $GITHUB_SHA_AFTER | grep '\.pptx$')
-          assets_changed=$(git diff --name-only $GITHUB_SHA_BEFORE $GITHUB_SHA_AFTER | grep '^assets/')
-
-          if [ -n "$pptx_changed" ] || [ -n "$assets_changed" ]; then
-            # install dependencies
-            sudo apt-get update
-            sudo apt-get -y install \
-              ffmpeg \
-              libreoffice \
-              poppler-utils \
-              bc
-
-            python3 -m pip install --upgrade pip
-            python3 -m pip install \
-              gTTS  \
-              moviepy \
-              pdf2image  \
-              python-pptx
-
-            # generate video
-            python3 pptx2video.py ${{ vars.PROJECT }}.pptx
-          fi
+        shell: bash
+        run: ./generate_video.sh $GITHUB_SHA_BEFORE $GITHUB_SHA_AFTER ${{ vars.PROJECT }}
         env:
           GITHUB_SHA_BEFORE: ${{ github.event.before }}
           GITHUB_SHA_AFTER: ${{ github.event.after }}
