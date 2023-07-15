@@ -156,8 +156,8 @@ def main():
 
     args = parser.parse_args()
 
-    if args.google_app_creds:
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = args.google_app_creds
+    if args.keyfile:
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = args.keyfile
 
     PPTXtoVideo(args.pptx).convert()
 
