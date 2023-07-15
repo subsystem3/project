@@ -149,8 +149,6 @@ jobs:
             <${artifact_url}>
 
             Vimeo Link
-            <${vimeo_url}>`
+            <https://vimeo.com/843997462/2f1e66d926>`
 
           });
-      env:
-        VIMEO_VIDEO_ID: ${{ secrets.VIMEO_VIDEO_ID }}
