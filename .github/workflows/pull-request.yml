@@ -44,10 +44,28 @@ jobs:
 
       - name: Generate PDFs
         shell: bash
-        run: ./generate_video.sh $GITHUB_SHA_BEFORE $GITHUB_SHA_AFTER ${{ vars.PROJECT }}
-        env:
-          GITHUB_SHA_BEFORE: ${{ github.event.before }}
-          GITHUB_SHA_AFTER: ${{ github.event.after }}
+        run: |
+          # LOOK FOR .tex ONLY IN CURRENT WORKING DIRECTORY
+          for file in *.tex
+          do
+            # CHANGE DIRECTORY DUE TO RELATIVE PATHS IN BUILDING
+            dir=$(dirname "$file")
+            base=$(basename "$file")
+            base_no_ext="${base%.*}"
+            pushd "$dir" > /dev/null
+
+            # DELETE OLD PDF IF IT EXISTS
+            rm -f "${base_no_ext}.pdf"
+
+            # BUILD PDF
+            pdflatex -interaction=nonstopmode "$base"
+
+            # CLEAN
+            rm -f *.aux *.log *.out *.toc *.fdb_latexmk *.fls *.bbl *.run.xml
+
+            # RETURN TO ORIGINAL DIRECTORY
+            popd > /dev/null
+          done
 
       - name: Upload PDF Artifacts to workflow run
         uses: actions/upload-artifact@v3.1.2
