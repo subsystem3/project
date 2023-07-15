@@ -137,6 +137,7 @@ jobs:
             ${{ vars.PROPOSAL }}.pdf
             ${{ vars.REPORT }}.pdf
             ${{ vars.PROJECT }}.mp4
+          tag_name: ${{ steps.tag_version.outputs.new_tag }}
           body: |
             DELIVERABLES:
               - [${{ vars.PROPOSAL }}.pdf](${{ vars.DOWNLOAD_URI }}/${{ steps.tag_version.outputs.new_tag }}/${{ vars.PROPOSAL }}.pdf)
