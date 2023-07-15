@@ -138,7 +138,7 @@ jobs:
     steps:
       - name: Bump version and push tag
         id: tag_version
-        uses: anothrNick/github-tag-action@1
+        uses: anothrNick/github-tag-action@1.67.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: true
@@ -193,16 +193,6 @@ jobs:
           VIMEO_ACCESS_TOKEN: ${{ secrets.VIMEO_ACCESS_TOKEN }}
           VIMEO_VIDEO_ID: ${{ secrets.VIMEO_VIDEO_ID }}
           VIDEO_PATH: ${{ vars.PROJECT }}.mp4
-
-      - name: Bump version and push tag
-        id: tag_version
-        uses: anothrNick/github-tag-action@1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          WITH_V: true
-          PRERELEASE: true
-        with:
-          default_bump: minor
 
       - name: Release
         uses: softprops/action-gh-release@v0.1.15
