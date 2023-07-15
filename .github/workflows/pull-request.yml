@@ -104,12 +104,41 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-apt-
 
+      - name: Decode Google Application Credentials
+        run: echo "${{ secrets.KEYFILE }}" | base64 --decode > keyfile.json
+
       - name: Generate Video
+        id: generate-video
         shell: bash
-        run: ./generate_video.sh $BEFORE $AFTER ${{ vars.PROJECT }}
-        env:
-          BEFORE: ${{ github.event.pull_request.base.sha }}
-          AFTER: ${{ github.event.pull_request.head.sha }}
+        run: |
+          # INSTALL DEPENDENCIES
+          sudo apt-get update
+          sudo apt-get -y install \
+              ffmpeg \
+              libreoffice \
+              poppler-utils \
+              bc
+
+          python3 -m pip install --upgrade pip
+          python3 -m pip install \
+              gTTS  \
+              moviepy \
+              pdf2image  \
+              python-pptx
+
+          # REMOVE OLD VIDEO
+          rm -f ${{ vars.PROJECT }}.mp4
+
+          # GENERATE VIDEO WITH PROFESSIONAL VOICEOVER
+          python3 pptx2video.py ${{ vars.PROJECT }}.pptx --keyfile keyfile.json
+
+          # GET TOTAL VIDEO DURATION
+          total_seconds=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ${{ vars.PROJECT }}.mp4)
+          hours=$(bc <<< "${total_seconds}/3600")
+          minutes=$(bc <<< "(${total_seconds}%3600)/60")
+          seconds=$(printf "%.0f" $(bc <<< "${total_seconds}%60"))
+          humanized_duration="${hours}h ${minutes}m ${seconds}s"
+          echo "duration=$humanized_duration" >> "$GITHUB_OUTPUT"
 
       - name: Upload to Vimeo via Python API
         run: |
