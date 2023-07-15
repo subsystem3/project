@@ -123,7 +123,7 @@ jobs:
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
-            body: `Workflow Artifacts (Video/PDFs):
+            body: `Workflow Artifacts (Video/PDFs)
             <${artifact_url}>
 
             Vimeo Link
