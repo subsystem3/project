@@ -2,7 +2,7 @@ Total duration: 3:24
 
 Slide 1:
 Duration: 0:06
-Voiceover: Let’s get started. Welcome to our project titled “Brand Sentiment Analysis of Twitter Posts.” 
+Voiceover: Let’s get started. Welcome to our project titled, Brand Sentiment Analysis of Twitter Posts.
 
 Slide 2:
 Duration: 0:09
