@@ -10,7 +10,6 @@ concurrency:
 
 permissions:
   contents: write
-  packages: read
 
 jobs:
   tag:
