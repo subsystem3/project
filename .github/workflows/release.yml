@@ -88,7 +88,7 @@ jobs:
           python3 -m pip install --upgrade pip
           python3 -m pip install \
               gTTS  \
-              moviepy \
+              moviepy[optional] \
               pdf2image  \
               python-pptx \
               google-cloud-texttospeech \
