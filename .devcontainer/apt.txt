@@ -1,3 +1,4 @@
+biber
 black
 chktex
 ffmpeg
@@ -11,4 +12,4 @@ texlive-latex-extra
 texlive-fonts-extra
 texlive-bibtex-extra
 texlive-science
-xvfb 
+xvfb
