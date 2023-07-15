@@ -11,7 +11,6 @@ concurrency:
 
 permissions:
   contents: write
-  packages: read
 
 jobs:
   release:
@@ -118,17 +117,6 @@ jobs:
           PRERELEASE: true
         with:
           default_bump: minor
-
-      - name: Push Artifacts to Main
-        run: |
-          git config --global user.name 'GitHub Actions'
-          git config --global user.email 'github-actions@github.com'
-          git config --global --add safe.directory /__w/project/project
-          git add **/*.pdf
-          git add assets
-          git add ${{ vars.PROJECT }}.mp4
-          git commit -m "Add assets and video"
-          git push --force
 
       - name: Upload to Vimeo via Python API
         run: |
