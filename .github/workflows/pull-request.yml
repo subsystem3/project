@@ -106,10 +106,10 @@ jobs:
 
       - name: Generate Video
         shell: bash
-        run: ./generate_video.sh $GITHUB_SHA_BEFORE $GITHUB_SHA_AFTER ${{ vars.PROJECT }}
+        run: ./generate_video.sh $BEFORE $AFTER ${{ vars.PROJECT }}
         env:
-          GITHUB_SHA_BEFORE: ${{ github.event.before }}
-          GITHUB_SHA_AFTER: ${{ github.event.after }}
+          BEFORE: ${{ github.event.pull_request.base.sha }}
+          AFTER: ${{ github.event.pull_request.head.sha }}
 
       - name: Upload to Vimeo via Python API
         run: |
