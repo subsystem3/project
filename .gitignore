@@ -172,6 +172,9 @@ cython_debug/
 *.bcf
 *.run.xml
 
+# TEMPORARY INTERMEDIARY MP3
+Final-Project-Team-2TEMP_MPY_wvf_snd.mp3
+
 # FOR GOOGLE CLOUD TTS
 keyfile.json
 
