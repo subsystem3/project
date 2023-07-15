@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  cleanup_artifacts:
+  delete_artifacts:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - name: Weekly Artifact Cleanup
+      - name: Delete All Artifacts
         uses: jimschubert/delete-artifacts-action@v1
         with:
           log_level: 'error'
