@@ -143,10 +143,9 @@ def main():
     )
 
     parser.add_argument(
-        "--pptx",
+        "pptx",
         type=str,
         help="The name of the PowerPoint file to convert.",
-        required=True,
     )
 
     parser.add_argument(
