@@ -113,7 +113,7 @@ jobs:
 
       - name: Generate Video
         id: generate-video
-        shell: bash
+        shell: bash -l {0}
         run: |
           conda activate venv
           rm -f ${{ vars.PROJECT }}.mp4
@@ -129,6 +129,7 @@ jobs:
           echo "duration=$humanized_duration" >> "$GITHUB_OUTPUT"
 
       - name: Upload to Vimeo via Python API
+        shell: bash -l {0}
         run: |
           conda activate venv
           python3 upload_video.py

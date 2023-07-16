@@ -115,7 +115,7 @@ jobs:
 
       - name: Generate Video
         id: generate-video
-        shell: bash
+        shell: bash -l {0}
         run: |
           conda activate venv
           rm -f ${{ vars.PROJECT }}.mp4
@@ -123,6 +123,7 @@ jobs:
           python3 pptx2video.py ${{ vars.PROJECT }}.pptx --keyfile keyfile.json
 
       - name: Upload to Vimeo via Python API
+        shell: bash -l {0}
         run: python3 upload_video.py
         env:
           VIMEO_CLIENT_ID: ${{ secrets.VIMEO_CLIENT_ID }}
