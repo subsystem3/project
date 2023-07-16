@@ -168,31 +168,31 @@ class PPTXtoVideo:
                     # SKIP IF NO CHANGES DETECTED
                     print(f"No changes detected for slide {i}, skipping...")
                     video = VideoFileClip(video_filename)
-                else:
-                    # STORE HASHES FOR NEXT TIME
-                    with open(f"hashes/hashes_{i}.txt", "w") as f:
-                        f.write(f"{text_hash}\n{image_hash}\n{voice_name}")
+            else:
+                # STORE HASHES FOR NEXT TIME
+                with open(f"hashes/hashes_{i}.txt", "w") as f:
+                    f.write(f"{text_hash}\n{image_hash}\n{voice_name}")
 
-                    # CREATE VOICEOVER
-                    voice_filename = f"{assets_dir}/voice_{i}.wav"
-                    self.text_to_wav(text, voice_filename, voice_name)
-                    print(f"Voiceover for slide {i} saved as {voice_filename}")
-                    audio = AudioFileClip(voice_filename)
+                # CREATE VOICEOVER
+                voice_filename = f"{assets_dir}/voice_{i}.wav"
+                self.text_to_wav(text, voice_filename, voice_name)
+                print(f"Voiceover for slide {i} saved as {voice_filename}")
+                audio = AudioFileClip(voice_filename)
 
-                    # ADD 0.5s SILENCE AT START AND END OF AUDIO (1s TOTAL BETWEEN SLIDES)
-                    silence = AudioArrayClip(
-                        np.array([[0], [0]]), fps=44100
-                    ).set_duration(0.5)
-                    audio = concatenate_audioclips([silence, audio, silence])
+                # ADD 0.5s SILENCE AT START AND END OF AUDIO (1s TOTAL BETWEEN SLIDES)
+                silence = AudioArrayClip(
+                    np.array([[0], [0]]), fps=44100
+                ).set_duration(0.5)
+                audio = concatenate_audioclips([silence, audio, silence])
 
-                    # CREATE VIDEO CLIP FROM IMAGE AND AUDIO
-                    img_clip = ImageClip(image_filename, duration=audio.duration)
-                    img_clip.resize(height=1080)
-                    video = img_clip.set_audio(audio)
+                # CREATE VIDEO CLIP FROM IMAGE AND AUDIO
+                img_clip = ImageClip(image_filename, duration=audio.duration)
+                img_clip.resize(height=1080)
+                video = img_clip.set_audio(audio)
 
-                    # SAVE EACH VIDEO CLIP
-                    video.write_videofile(f"{assets_dir}/video_{i}.mp4", fps=24)
-                    print(f"Video for slide {i} saved as {video_filename}")
+                # SAVE EACH VIDEO CLIP
+                video.write_videofile(f"{assets_dir}/video_{i}.mp4", fps=24)
+                print(f"Video for slide {i} saved as {video_filename}")
 
             videos.append(video)
 
