@@ -75,15 +75,22 @@ jobs:
 
       - name: Generate Video
         id: generate-video
-        shell: bash -l {0}
         run: |
-          conda activate venv
           sudo apt-get update
           sudo apt-get -y install \
               ffmpeg \
               libreoffice \
               poppler-utils \
               bc
+
+          python3 -m pip install --upgrade pip
+          python3 -m pip install \
+              gTTS  \
+              moviepy \
+              pdf2image  \
+              python-pptx \
+              google-cloud-texttospeech \
+              numpy
 
           rm -f ${{ vars.PROJECT }}.mp4
           echo "${{ secrets.KEYFILE }}" | base64 --decode > keyfile.json
@@ -107,9 +114,9 @@ jobs:
           DEFAULT_BUMP: minor
 
       - name: Upload to Vimeo via Python API
-        shell: bash -l {0}
         run: |
-          conda activate venv
+          python3 -m pip install --upgrade pip
+          pip install PyVimeo
           python3 upload_video.py
         env:
           VIMEO_CLIENT_ID: ${{ secrets.VIMEO_CLIENT_ID }}
