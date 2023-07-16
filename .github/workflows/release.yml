@@ -18,10 +18,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out main branch
-        uses: actions/checkout@v3.5.3
+        uses: actions/checkout@v3
         with:
           ref: main
           fetch-depth: '0'
+
+      - name: Git LFS pull
+        run: |
+          sudo apt-get install git-lfs
+          git lfs pull --include="stock/*"
+          git lfs pull --include="assets/*"
 
       - name: Cache pip packages
         uses: actions/cache@v3
@@ -49,56 +55,51 @@ jobs:
             texlive-latex-extra \
             texlive-fonts-extra \
             texlive-bibtex-extra \
-            texlive-science \
+            texlive-science
 
-          # LOOK FOR .tex ONLY IN CURRENT WORKING DIRECTORY
           for file in *.tex
           do
-            # CHANGE DIRECTORY DUE TO RELATIVE PATHS IN BUILDING
             dir=$(dirname "$file")
             base=$(basename "$file")
             base_no_ext="${base%.*}"
             pushd "$dir" > /dev/null
-
-            # DELETE OLD PDF IF IT EXISTS
             rm -f "${base_no_ext}.pdf"
-
-            # BUILD PDF
             pdflatex -interaction=nonstopmode "$base"
-
-            # CLEAN
+            biber "$base_no_ext"
+            pdflatex -interaction=nonstopmode "$base"
+            pdflatex -interaction=nonstopmode "$base"
             rm -f *.aux *.log *.out *.toc *.fdb_latexmk *.fls *.synctex.gz *.bbl *.run.xml
-
-            # RETURN TO ORIGINAL DIRECTORY
             popd > /dev/null
           done
 
+      - name: Set up Python
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: venv
+          environment-file: environment.yml
+          auto-activate-base: false
+
       - name: Generate Video
         id: generate-video
-        shell: bash
         run: |
-          # INSTALL DEPENDENCIES
           sudo apt-get update
           sudo apt-get -y install \
+              bc \
               ffmpeg \
               libreoffice \
-              poppler-utils \
-              bc
+              poppler-utils
 
           python3 -m pip install --upgrade pip
           python3 -m pip install \
-              gTTS  \
-              moviepy[optional] \
-              pdf2image  \
-              python-pptx \
               google-cloud-texttospeech \
+              gTTS  \
+              moviepy \
               numpy \
-              pillow==6.2.2
+              pdf2image  \
+              Pillow==6.2.2 \
+              python-pptx
 
-          # REMOVE OLD VIDEO
           rm -f ${{ vars.PROJECT }}.mp4
-
-          # GENERATE VIDEO WITH PROFESSIONAL VOICEOVER
           echo "${{ secrets.KEYFILE }}" | base64 --decode > keyfile.json
           python3 pptx2video.py ${{ vars.PROJECT }}.pptx --keyfile keyfile.json
 

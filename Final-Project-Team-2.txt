@@ -1,4 +1,4 @@
-Total duration: 3:35
+Total duration: 3:36
 
 Slide 1:
 Duration: 0:06
@@ -50,7 +50,7 @@ Duration: 0:13
 Voiceover: We faced challenges such as the 'aboutness' problem, which refers to the challenge of determining the subject of the sentiment expressed in a sentence. We also encountered issues with complex sentences and ambiguous subjects.
 
 Slide 13:
-Duration: 0:12
+Duration: 0:13
 Voiceover: In the conclusion, we will summarize the main findings of our project, conclude the report by discussing the significance of our findings, and discuss potential future work, such as how our project could be extended or improved.
 
 Slide 14:

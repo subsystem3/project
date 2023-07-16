@@ -9,9 +9,9 @@ dependencies:
   - boltons=23.0.0=py311h06a4308_0
   - brotlipy=0.7.0=py311h5eee18b_1002
   - bzip2=1.0.8=h7b6447c_0
-  - ca-certificates=2023.05.30=h06a4308_0
+  - ca-certificates=2023.5.7=hbcca054_0
   - cairo=1.16.0=hb05425b_5
-  - certifi=2023.5.7=py311h06a4308_0
+  - certifi=2023.5.7=pyhd8ed1ab_0
   - cffi=1.15.1=py311h5eee18b_3
   - conda=23.5.2=py311h06a4308_0
   - conda-package-handling=2.1.0=py311h06a4308_0
@@ -107,10 +107,16 @@ dependencies:
   - zstandard=0.19.0=py311h5eee18b_0
   - zstd=1.5.5=hc292b87_0
   - pip:
+      - aiohttp==3.8.4
+      - aiosignal==1.3.1
+      - async-timeout==4.0.2
+      - attrs==23.1.0
       - cachetools==5.3.1
       - charset-normalizer==3.2.0
       - click==8.1.5
       - decorator==4.4.2
+      - frozenlist==1.4.0
+      - future==0.18.3
       - google-api-core==2.11.1
       - google-auth==2.22.0
       - google-cloud-texttospeech==2.14.1
@@ -122,6 +128,7 @@ dependencies:
       - imageio-ffmpeg==0.4.8
       - lxml==4.9.3
       - moviepy==1.0.3
+      - multidict==6.0.4
       - pdf2image==1.16.3
       - pillow==10.0.0
       - proglog==0.1.10
@@ -130,8 +137,12 @@ dependencies:
       - pyasn1==0.5.0
       - pyasn1-modules==0.3.0
       - python-pptx==0.6.21
+      - pyvimeo==1.1.0
       - requests==2.31.0
       - rsa==4.9
       - six==1.16.0
+      - tinydb==4.8.0
+      - tuspy==1.0.1
       - xlsxwriter==3.1.2
+      - yarl==1.9.2
 prefix: /home/user/anaconda3/envs/venv
