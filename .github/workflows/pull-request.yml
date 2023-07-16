@@ -106,10 +106,8 @@ jobs:
         id: generate-video
         shell: bash
         run: |
-          # REMOVE OLD VIDEO
+          source activate venv
           rm -f ${{ vars.PROJECT }}.mp4
-
-          # GENERATE VIDEO WITH PROFESSIONAL VOICEOVER
           echo "${{ secrets.KEYFILE }}" | base64 --decode > keyfile.json
           python3 pptx2video.py ${{ vars.PROJECT }}.pptx --keyfile keyfile.json
 
