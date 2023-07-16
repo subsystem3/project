@@ -110,10 +110,12 @@ jobs:
           python3 -m pip install --upgrade pip
           python3 -m pip install \
               gTTS  \
-              moviepy \
+              moviepy[optional] \
               pdf2image  \
               python-pptx \
-              google-cloud-texttospeech
+              google-cloud-texttospeech \
+              numpy \
+              pillow==6.2.2
 
           # REMOVE OLD VIDEO
           rm -f ${{ vars.PROJECT }}.mp4
@@ -121,14 +123,6 @@ jobs:
           # GENERATE VIDEO WITH PROFESSIONAL VOICEOVER
           echo "${{ secrets.KEYFILE }}" | base64 --decode > keyfile.json
           python3 pptx2video.py ${{ vars.PROJECT }}.pptx --keyfile keyfile.json
-
-          # GET TOTAL VIDEO DURATION
-          total_seconds=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ${{ vars.PROJECT }}.mp4)
-          hours=$(bc <<< "${total_seconds}/3600")
-          minutes=$(bc <<< "(${total_seconds}%3600)/60")
-          seconds=$(printf "%.0f" $(bc <<< "${total_seconds}%60"))
-          humanized_duration="${hours}h ${minutes}m ${seconds}s"
-          echo "duration=$humanized_duration" >> "$GITHUB_OUTPUT"
 
       - name: Upload to Vimeo via Python API
         run: |

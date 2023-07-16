@@ -108,10 +108,12 @@ jobs:
           python3 -m pip install --upgrade pip
           python3 -m pip install \
               gTTS  \
-              moviepy \
+              moviepy[optional] \
               pdf2image  \
               python-pptx \
-              google-cloud-texttospeech
+              google-cloud-texttospeech \
+              numpy \
+              pillow==6.2.2
 
           # REMOVE OLD VIDEO
           rm -f ${{ vars.PROJECT }}.mp4
