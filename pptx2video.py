@@ -146,55 +146,27 @@ class PPTXtoVideo:
 
             print(f"Slide {i} image saved as {image_filename}")
 
-            # CALCULATE HASHES FOR VOICEOVER TEXT AND SLIDES
-            text_hash = hashlib.md5(text.encode()).hexdigest()
-            with open(image_filename, "rb") as f:
-                image_hash = hashlib.md5(f.read()).hexdigest()
+            # CREATE VOICEOVER
+            voice_filename = f"{assets_dir}/voice_{i}.wav"
+            self.text_to_wav(text, voice_filename, voice_name)
+            print(f"Voiceover for slide {i} saved as {voice_filename}")
+            audio = AudioFileClip(voice_filename)
 
-            # CHECK STORED HASHES TO SEE IF SLIDE HAS CHANGED
-            os.makedirs("hashes", exist_ok=True)
-            video_filename = f"{assets_dir}/video_{i}.mp4"
-            if os.path.exists(f"hashes/hashes_{i}.txt"):
-                with open(f"hashes/hashes_{i}.txt", "r") as f:
-                    stored_values = f.read().splitlines()
-                stored_text_hash, stored_image_hash = stored_values[:2]
-                stored_voice_name = stored_values[2] if len(stored_values) > 2 else None
-                if (
-                    text_hash == stored_text_hash
-                    and image_hash == stored_image_hash
-                    and voice_name == stored_voice_name
-                    and os.path.exists(video_filename)
-                ):
-                    # SKIP IF NO CHANGES DETECTED
-                    print(f"No changes detected for slide {i}, skipping...")
-                    video = VideoFileClip(video_filename)
-                else:
-                    # STORE HASHES FOR NEXT TIME
-                    with open(f"hashes/hashes_{i}.txt", "w") as f:
-                        f.write(f"{text_hash}\n{image_hash}\n{voice_name}")
+            # ADD 0.5s SILENCE AT START AND END OF AUDIO (1s TOTAL BETWEEN SLIDES)
+            silence = AudioArrayClip(
+                np.array([[0], [0]]), fps=44100
+            ).set_duration(0.5)
+            audio = concatenate_audioclips([silence, audio, silence])
 
-                    # CREATE VOICEOVER
-                    voice_filename = f"{assets_dir}/voice_{i}.wav"
-                    self.text_to_wav(text, voice_filename, voice_name)
-                    print(f"Voiceover for slide {i} saved as {voice_filename}")
-                    audio = AudioFileClip(voice_filename)
+            # CREATE VIDEO CLIP FROM IMAGE AND AUDIO
+            img_clip = ImageClip(image_filename, duration=audio.duration)
+            img_clip.resize(height=1080)
+            video = img_clip.set_audio(audio)
 
-                    # ADD 0.5s SILENCE AT START AND END OF AUDIO (1s TOTAL BETWEEN SLIDES)
-                    silence = AudioArrayClip(
-                        np.array([[0], [0]]), fps=44100
-                    ).set_duration(0.5)
-                    audio = concatenate_audioclips([silence, audio, silence])
+            # SAVE EACH VIDEO CLIP
+            video.write_videofile(f"{assets_dir}/video_{i}.mp4", fps=24)
 
-                    # CREATE VIDEO CLIP FROM IMAGE AND AUDIO
-                    img_clip = ImageClip(image_filename, duration=audio.duration)
-                    img_clip.resize(height=1080)
-                    video = img_clip.set_audio(audio)
-
-                    # SAVE EACH VIDEO CLIP
-                    video.write_videofile(f"{assets_dir}/video_{i}.mp4", fps=24)
-                    print(f"Video for slide {i} saved as {video_filename}")
-
-                    videos.append(video)
+            videos.append(video)
 
         return videos
 
@@ -206,33 +178,6 @@ class PPTXtoVideo:
             videos (List[AudioFileClip]): List of video clips.
         """
         intro_clip = VideoFileClip("stock/intro.mp4")
-        candidate_intro_hash = self.hash_file("stock/intro.mp4")
-
-        # CHECK HASH FILE FOR INTRO VIDEO
-        if os.path.exists("hashes/hash_intro.txt"):
-            with open("hashes/hash_intro.txt", "r") as f:
-                stored_intro_hash = f.read().strip()
-
-            # CHECK IF ALL INDIVIDUAL SLIDE VIDEOS EXIST
-            all_videos_exist = all(
-                os.path.exists(f"assets/video_{i}.mp4") for i in range(len(self.slides))
-            )
-
-            # SKIP VIDEO GENERATION WHEN NO CHANGES DETECTED, FINAL VIDEO EXISTS, AND ALL INDIVIDUAL VIDEOS EXIST
-            if (
-                all(video is None for video in videos)
-                and candidate_intro_hash == stored_intro_hash
-                and os.path.exists(self.output_file)
-                and all_videos_exist
-            ):
-                print("No changes detected, skipping video generation...")
-                return
-        else:
-            # STORE HASH FOR INTRO VIDEO
-            stored_intro_hash = self.hash_file("stock/intro.mp4")
-            with open("hashes/hash_intro.txt", "w") as f:
-                f.write(stored_intro_hash)
-
         intro_clip = crossfadeout(intro_clip, 1)
         videos[0] = crossfadein(videos[0], 1)
         videos.insert(0, intro_clip)
@@ -244,22 +189,6 @@ class PPTXtoVideo:
         videos = self.create_videos()
         self.write_metadata(videos)
         self.combine_videos(videos)
-
-        # STORE HASH FOR INTRO VIDEO
-        self.stored_intro_hash = self.hash_file("stock/intro.mp4")
-        with open("hashes/hashes_intro.txt", "w") as f:
-            f.write(self.stored_intro_hash)
-
-        # DELETE HASH FILES FOR CONTENT THAT NO LONGER EXISTS
-        total_slides = len(self.slides)
-        for hash_file in os.scandir("hashes"):
-            file_index_str = os.path.splitext(hash_file.name)[0].split("_")[-1]
-            if not file_index_str.isdigit():
-                continue
-            file_index = int(file_index_str)
-            if file_index >= total_slides:
-                os.remove(hash_file.path)
-
 
 def main():
     """
