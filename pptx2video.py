@@ -4,8 +4,19 @@ import shutil
 import subprocess
 from typing import List
 
+import cv2
+import numpy as np
+from google.cloud import texttospeech as tts
 from gtts import gTTS
-from moviepy.editor import AudioFileClip, ImageClip, concatenate_videoclips
+from moviepy.audio.AudioClip import AudioArrayClip
+from moviepy.editor import (
+    AudioFileClip,
+    ImageClip,
+    VideoFileClip,
+    concatenate_audioclips,
+    concatenate_videoclips,
+)
+from moviepy.video.compositing.transitions import crossfadein, crossfadeout
 from pdf2image import convert_from_path
 from pptx import Presentation
 
@@ -24,6 +35,43 @@ class PPTXtoVideo:
         self.voiceover_texts = [
             slide.notes_slide.notes_text_frame.text for slide in self.slides
         ]
+
+    def text_to_wav(self, text: str, filename: str, voice_name: str = "en-US-Studio-M"):
+        """
+        Converts the given text to speech and saves it as a .wav file.
+
+        If the GOOGLE_APPLICATION_CREDENTIALS environment variable is set, this method uses
+        Google Cloud Text-to-Speech to generate the speech. Otherwise, it uses gTTS.
+
+        Args:
+            text (str): The text to convert to speech.
+            filename (str): The name of the .wav file to save the speech to.
+            voice_name (str, optional): The name of the voice to use for speech generation.
+                This should be a voice name from Google Cloud Text-to-Speech (e.g., "en-US-Studio-M").
+                Defaults to "en-US-Studio-M".
+        """
+        # USE PROFESSIONAL VOICES FROM GOOGLE CLOUD
+        if "GOOGLE_APPLICATION_CREDENTIALS" in os.environ:
+            language_code = "-".join(voice_name.split("-")[:2])
+            text_input = tts.SynthesisInput(text=text)
+            voice_params = tts.VoiceSelectionParams(
+                language_code=language_code, name=voice_name
+            )
+            audio_config = tts.AudioConfig(audio_encoding=tts.AudioEncoding.LINEAR16)
+            client = tts.TextToSpeechClient()
+
+            response = client.synthesize_speech(
+                input=text_input,
+                voice=voice_params,
+                audio_config=audio_config,
+            )
+
+            with open(filename, "wb") as out:
+                out.write(response.audio_content)
+        # USE FREE NON-PROFESSIONAL VOICES FROM GTTS
+        else:
+            voice = gTTS(text=text, lang="en", slow=False)
+            voice.save(filename)
 
     def format_duration(self, duration: int) -> str:
         """
@@ -58,7 +106,7 @@ class PPTXtoVideo:
         Converts the .pptx file to a .pdf file using LibreOffice.
         """
         cmd = f"libreoffice --headless --convert-to pdf {self.pptx_filename}"
-        subprocess.run(cmd, shell=True, check=True)
+        subprocess.run(cmd, shell=True, check=True, env={"PATH": "/usr/bin"})
 
     def create_videos(self) -> List[AudioFileClip]:
         """
@@ -72,16 +120,20 @@ class PPTXtoVideo:
         if os.path.exists(assets_dir):
             shutil.rmtree(assets_dir)
         os.makedirs(assets_dir, exist_ok=True)
-        for i, slide in enumerate(self.slides):
+        for i, _ in enumerate(self.slides):
             text = self.voiceover_texts[i]
             images = convert_from_path(self.pdf_filename, dpi=300)
             images[i].save(f"{assets_dir}/slide_{i}.png", "PNG")
-            voice = gTTS(text=text, lang="en", slow=False)
-            voice.save(f"{assets_dir}/voice_{i}.mp3")
-            audio = AudioFileClip(f"{assets_dir}/voice_{i}.mp3")
-            img_clip = ImageClip(
-                f"{assets_dir}/slide_{i}.png", duration=audio.duration + 1
-            )
+            voice_filename = f"{assets_dir}/voice_{i}.wav"
+            self.text_to_wav(text, voice_filename)
+            audio = AudioFileClip(voice_filename)
+
+            # CREATE 0.5s SILENCE AT BEGINNING AND END OF AUDIO (1s TOTAL BETWEEN SLIDES)
+            silence = AudioArrayClip(np.array([[0], [0]]), fps=44100).set_duration(0.5)
+            audio = concatenate_audioclips([silence, audio, silence])
+
+            img_clip = ImageClip(f"{assets_dir}/slide_{i}.png", duration=audio.duration)
+            img_clip.resize(height=1080)
             video = img_clip.set_audio(audio)
             videos.append(video)
         return videos
@@ -93,7 +145,11 @@ class PPTXtoVideo:
         Args:
             videos (List[AudioFileClip]): List of video clips.
         """
-        final_clip = concatenate_videoclips(videos, method="compose")
+        intro_clip = VideoFileClip("stock/intro.mp4")
+        intro_clip = crossfadeout(intro_clip, 1)
+        videos[0] = crossfadein(videos[0], 1)
+        videos.insert(0, intro_clip)
+        final_clip = concatenate_videoclips(videos)
         final_clip.write_videofile(self.output_file, fps=24)
 
     def convert(self):
@@ -108,19 +164,27 @@ class PPTXtoVideo:
 
 def main():
     """
-    Main function to test the PPTXtoVideo class.
+    Parse command line arguments and convert PowerPoint to video.
     """
     parser = argparse.ArgumentParser(
         description="Convert a PowerPoint presentation to a video."
     )
-
     parser.add_argument(
         "pptx",
         type=str,
         help="The name of the PowerPoint file to convert.",
     )
+    parser.add_argument(
+        "--keyfile",
+        type=str,
+        help="The path to the Google service account JSON file.",
+        required=False,
+    )
 
     args = parser.parse_args()
+    if args.keyfile:
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = args.keyfile
+
     PPTXtoVideo(args.pptx).convert()
 
 

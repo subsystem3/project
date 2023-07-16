@@ -10,9 +10,24 @@ concurrency:
 
 permissions:
   contents: write
-  packages: read
 
 jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v3.5.3
+        with:
+          ref: dev
+          fetch-depth: '0'
+
+      - name: Bump version and push tag
+        uses: anothrNick/github-tag-action@1.67.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+          DEFAULT_BUMP: patch
+
   build-pdfs:
     runs-on: ubuntu-latest
     container:
@@ -25,33 +40,42 @@ jobs:
           fetch-depth: '0'
 
       - name: Generate PDFs
+        shell: bash
         run: |
-          # generate twice to get past title page bug
-          pdflatex ${{ vars.REPORT }}.tex
-          pdflatex ${{ vars.REPORT }}.tex
-          pdflatex ${{ vars.PROPOSAL }}.tex
-          pdflatex ${{ vars.PROPOSAL }}.tex
+          # LOOK FOR .tex ONLY IN CURRENT WORKING DIRECTORY
+          for file in *.tex
+          do
+            # CHANGE DIRECTORY DUE TO RELATIVE PATHS IN BUILDING
+            dir=$(dirname "$file")
+            base=$(basename "$file")
+            base_no_ext="${base%.*}"
+            pushd "$dir" > /dev/null
 
-      - name: Upload PDF Artifacts
-        uses: actions/upload-artifact@v3.1.2
-        with:
-          name: pdfs
-          path: |
-            ${{ vars.REPORT }}.pdf
-            ${{ vars.PROPOSAL }}.pdf
+            # DELETE OLD PDF IF IT EXISTS
+            rm -f "${base_no_ext}.pdf"
+
+            # BUILD PDF
+            pdflatex -interaction=nonstopmode "$base"
+
+            # CLEAN
+            rm -f *.aux *.log *.out *.toc *.fdb_latexmk *.fls *.synctex.gz *.bbl *.run.xml
+
+            # RETURN TO ORIGINAL DIRECTORY
+            popd > /dev/null
+          done
 
   build-video:
-    runs-on: ubuntu-latest
     environment: test
+    runs-on: ubuntu-latest
     steps:
       - name: Check out dev branch
-        uses: actions/checkout@v3.5.3
+        uses: actions/checkout@v3
         with:
           ref: dev
-          fetch-depth: '0'
+          fetch-depth: '2'
 
       - name: Cache pip packages
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v3
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
@@ -62,7 +86,7 @@ jobs:
         run: sudo chown -R $(whoami) /var/cache/apt/archives
 
       - name: Cache apt packages
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v3
         with:
           path: /var/cache/apt/archives
           key: ${{ runner.os }}-apt-${{ hashFiles('/etc/apt/sources.list') }}
@@ -70,30 +94,39 @@ jobs:
             ${{ runner.os }}-apt-
 
       - name: Generate Video
+        id: generate-video
+        shell: bash
         run: |
-          # install dependencies
+          # INSTALL DEPENDENCIES
           sudo apt-get update
           sudo apt-get -y install \
-            ffmpeg \
-            libreoffice \
-            poppler-utils \
-            bc
+              ffmpeg \
+              libreoffice \
+              poppler-utils \
+              bc
 
           python3 -m pip install --upgrade pip
           python3 -m pip install \
-            gTTS  \
-            moviepy \
-            pdf2image  \
-            python-pptx
+              gTTS  \
+              moviepy \
+              pdf2image  \
+              python-pptx \
+              google-cloud-texttospeech
 
-          # generate video
-          python3 pptx2video.py ${{ vars.PROJECT }}.pptx
+          # REMOVE OLD VIDEO
+          rm -f ${{ vars.PROJECT }}.mp4
 
-      - name: Upload Video Artifact
-        uses: actions/upload-artifact@v3.1.2
-        with:
-          name: video
-          path: ${{ vars.PROJECT }}.mp4
+          # GENERATE VIDEO WITH PROFESSIONAL VOICEOVER
+          echo "${{ secrets.KEYFILE }}" | base64 --decode > keyfile.json
+          python3 pptx2video.py ${{ vars.PROJECT }}.pptx --keyfile keyfile.json
+
+          # GET TOTAL VIDEO DURATION
+          total_seconds=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ${{ vars.PROJECT }}.mp4)
+          hours=$(bc <<< "${total_seconds}/3600")
+          minutes=$(bc <<< "(${total_seconds}%3600)/60")
+          seconds=$(printf "%.0f" $(bc <<< "${total_seconds}%60"))
+          humanized_duration="${hours}h ${minutes}m ${seconds}s"
+          echo "duration=$humanized_duration" >> "$GITHUB_OUTPUT"
 
       - name: Upload to Vimeo via Python API
         run: |

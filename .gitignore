@@ -164,5 +164,15 @@ cython_debug/
 *.fdb_latexmk
 *.fls
 *.synctex.gz
+*.synctex.gz(busy)
 *.log
 *.out
+*.bbl
+*.blg
+*.bcf
+*.run.xml
+
+# USE WORKFLOW TO GENERATE PDFs
+*.pdf
+
+keyfile.json

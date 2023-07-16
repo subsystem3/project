@@ -1,172 +1,152 @@
-  name: Release
+name: Release
 
-  on:
-    pull_request:
-      branches: [main]
-      types: [closed]
+on:
+  pull_request:
+    branches: [main]
+    types: [closed]
 
-  concurrency:
-    group: ${{ github.workflow }}-${{ github.ref }}
-    cancel-in-progress: true
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
-  permissions:
-    contents: write
-    packages: read
+permissions:
+  contents: write
 
-  jobs:
-    build-pdfs:
-      runs-on: ubuntu-latest
-      container:
-        image: texlive/texlive:latest
-      steps:
-        - name: Check out main branch
-          uses: actions/checkout@v3.5.3
-          with:
-            ref: main
-            fetch-depth: '0'
+jobs:
+  release:
+    environment: production
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out main branch
+        uses: actions/checkout@v3.5.3
+        with:
+          ref: main
+          fetch-depth: '0'
 
-        - name: Generate PDFs
-          run: |
-            # must generate twice
-            pdflatex ${{ vars.REPORT }}.tex
-            pdflatex ${{ vars.REPORT }}.tex
-            pdflatex ${{ vars.PROPOSAL }}.tex
-            pdflatex ${{ vars.PROPOSAL }}.tex
+      - name: Cache pip packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
-        - name: Upload PDFs
-          uses: actions/upload-artifact@v3.1.2
-          with:
-            name: pdfs
-            path: |
-              ${{ vars.REPORT }}.pdf
-              ${{ vars.PROPOSAL }}.pdf
+      - name: Cache apt packages
+        uses: actions/cache@v3
+        with:
+          path: /var/cache/apt/archives
+          key: ${{ runner.os }}-apt-${{ hashFiles('/etc/apt/sources.list') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-
 
-    build-video:
-      runs-on: ubuntu-latest
-      outputs:
-        duration: ${{ steps.generate-video.outputs.duration }}
-      steps:
-        - name: Check out main branch
-          uses: actions/checkout@v3.5.3
-          with:
-            ref: main
-            fetch-depth: '0'
+      - name: Generate PDFs
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install \
+            biber \
+            texlive \
+            texlive-latex-extra \
+            texlive-fonts-extra \
+            texlive-bibtex-extra \
+            texlive-science \
 
-        - name: Cache pip packages
-          uses: actions/cache@v3.3.1
-          with:
-            path: ~/.cache/pip
-            key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-            restore-keys: |
-              ${{ runner.os }}-pip-
+          # LOOK FOR .tex ONLY IN CURRENT WORKING DIRECTORY
+          for file in *.tex
+          do
+            # CHANGE DIRECTORY DUE TO RELATIVE PATHS IN BUILDING
+            dir=$(dirname "$file")
+            base=$(basename "$file")
+            base_no_ext="${base%.*}"
+            pushd "$dir" > /dev/null
 
-        - name: Change ownership of apt archives
-          run: sudo chown -R $(whoami) /var/cache/apt/archives
+            # DELETE OLD PDF IF IT EXISTS
+            rm -f "${base_no_ext}.pdf"
 
-        - name: Cache apt packages
-          uses: actions/cache@v3.3.1
-          with:
-            path: /var/cache/apt/archives
-            key: ${{ runner.os }}-apt-${{ hashFiles('/etc/apt/sources.list') }}
-            restore-keys: |
-              ${{ runner.os }}-apt-
+            # BUILD PDF
+            pdflatex -interaction=nonstopmode "$base"
 
-        - name: Generate Video
-          id: generate-video
-          run: |
-            # install dependencies
-            sudo apt-get update
-            sudo apt-get -y install \
+            # CLEAN
+            rm -f *.aux *.log *.out *.toc *.fdb_latexmk *.fls *.synctex.gz *.bbl *.run.xml
+
+            # RETURN TO ORIGINAL DIRECTORY
+            popd > /dev/null
+          done
+
+      - name: Generate Video
+        id: generate-video
+        shell: bash
+        run: |
+          # INSTALL DEPENDENCIES
+          sudo apt-get update
+          sudo apt-get -y install \
               ffmpeg \
               libreoffice \
               poppler-utils \
               bc
 
-            python3 -m pip install --upgrade pip
-            python3 -m pip install \
+          python3 -m pip install --upgrade pip
+          python3 -m pip install \
               gTTS  \
               moviepy \
               pdf2image  \
-              python-pptx
+              python-pptx \
+              google-cloud-texttospeech
 
-            # generate video
-            python3 pptx2video.py ${{ vars.PROJECT }}.pptx
+          # REMOVE OLD VIDEO
+          rm -f ${{ vars.PROJECT }}.mp4
 
-            # get total video duration
-            total_seconds=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ${{ vars.PROJECT }}.mp4)
-            hours=$(bc <<< "${total_seconds}/3600")
-            minutes=$(bc <<< "(${total_seconds}%3600)/60")
-            seconds=$(printf "%.0f" $(bc <<< "${total_seconds}%60"))
-            humanized_duration="${hours}h ${minutes}m ${seconds}s"
-            echo "duration=$humanized_duration" >> "$GITHUB_OUTPUT"
+          # GENERATE VIDEO WITH PROFESSIONAL VOICEOVER
+          echo "${{ secrets.KEYFILE }}" | base64 --decode > keyfile.json
+          python3 pptx2video.py ${{ vars.PROJECT }}.pptx --keyfile keyfile.json
 
-        - name: Upload Video
-          uses: actions/upload-artifact@v3.1.2
-          with:
-            name: video
-            path: ${{ vars.PROJECT }}.mp4
+          # GET TOTAL VIDEO DURATION
+          total_seconds=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ${{ vars.PROJECT }}.mp4)
+          hours=$(bc <<< "${total_seconds}/3600")
+          minutes=$(bc <<< "(${total_seconds}%3600)/60")
+          seconds=$(printf "%.0f" $(bc <<< "${total_seconds}%60"))
+          humanized_duration="${hours}h ${minutes}m ${seconds}s"
+          echo "duration=$humanized_duration" >> "$GITHUB_OUTPUT"
 
-    release:
-      if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
-      needs: [build-pdfs, build-video]
-      runs-on: ubuntu-latest
-      environment: production
-      steps:
-        - name: Check out main branch
-          uses: actions/checkout@v3.5.3
-          with:
-            ref: ${{ github.event.pull_request.merge_commit_sha }}
-            fetch-depth: '0'
+      - name: Bump version and push tag
+        id: tag_version
+        uses: anothrNick/github-tag-action@1.67.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+          PRERELEASE: true
+        with:
+          default_bump: minor
 
-        - name: Download Video Artifacts
-          uses: actions/download-artifact@v3.0.2
-          with:
-            name: video
+      - name: Upload to Vimeo via Python API
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install PyVimeo
+          python3 upload_video.py
+        env:
+          VIMEO_CLIENT_ID: ${{ secrets.VIMEO_CLIENT_ID }}
+          VIMEO_CLIENT_SECRET: ${{ secrets.VIMEO_CLIENT_SECRET }}
+          VIMEO_ACCESS_TOKEN: ${{ secrets.VIMEO_ACCESS_TOKEN }}
+          VIMEO_VIDEO_ID: ${{ secrets.VIMEO_VIDEO_ID }}
+          VIDEO_PATH: ${{ vars.PROJECT }}.mp4
 
-        - name: Upload to Vimeo via Python API
-          run: |
-            python3 -m pip install --upgrade pip
-            pip install PyVimeo
-            python3 upload_video.py
-          env:
-            VIMEO_CLIENT_ID: ${{ secrets.VIMEO_CLIENT_ID }}
-            VIMEO_CLIENT_SECRET: ${{ secrets.VIMEO_CLIENT_SECRET }}
-            VIMEO_ACCESS_TOKEN: ${{ secrets.VIMEO_ACCESS_TOKEN }}
-            VIMEO_VIDEO_ID: ${{ secrets.VIMEO_VIDEO_ID }}
-            VIDEO_PATH: ${{ vars.PROJECT }}.mp4
+      - name: Release
+        uses: softprops/action-gh-release@v0.1.15
+        with:
+          files: |
+            ${{ vars.PROPOSAL }}.pdf
+            ${{ vars.REPORT }}.pdf
+            ${{ vars.PROJECT }}.mp4
+          tag_name: ${{ steps.tag_version.outputs.new_tag }}
+          body: |
+            DELIVERABLES:
+              - [${{ vars.PROPOSAL }}.pdf](${{ vars.DOWNLOAD_URI }}/${{ steps.tag_version.outputs.new_tag }}/${{ vars.PROPOSAL }}.pdf)
+              - [${{ vars.REPORT }}.pdf](${{ vars.DOWNLOAD_URI }}/${{ steps.tag_version.outputs.new_tag }}/${{ vars.REPORT }}.pdf)
+              - [${{ vars.PROJECT }}.mp4](${{ vars.DOWNLOAD_URI }}/${{ steps.tag_version.outputs.new_tag }}/${{ vars.PROJECT }}.mp4)
 
-        - name: Download PDF Artifacts
-          uses: actions/download-artifact@v3.0.2
-          with:
-            name: pdfs
+            VIDEO DURATION: ${{ steps.generate-video.outputs.duration }}
 
-        - name: Bump version and push tag
-          id: tag_version
-          uses: anothrNick/github-tag-action@1.67.0
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            WITH_V: true
-            PRERELEASE: true
-          with:
-            default_bump: minor
+            VIDEO LINK: <https://vimeo.com/${{ secrets.VIMEO_VIDEO_ID }}/2f1e66d926>
 
-        - name: Release
-          uses: softprops/action-gh-release@v0.1.15
-          with:
-            tag_name: ${{ steps.tag_version.outputs.new_tag }}
-            files: |
-              ${{ vars.PROPOSAL }}.pdf
-              ${{ vars.REPORT }}.pdf
-              ${{ vars.PROJECT }}.mp4
-            body: |
-              DELIVERABLES:
-                - [${{ vars.PROPOSAL }}.pdf](${{vars.DOWNLOAD_URI}}/${{ steps.tag_version.outputs.new_tag }}/${{ vars.PROPOSAL }}.pdf)
-                - [${{ vars.REPORT }}.pdf](${{vars.DOWNLOAD_URI}}/${{ steps.tag_version.outputs.new_tag }}/${{ vars.REPORT }}.pdf)
-                - [${{ vars.PROJECT }}.mp4](${{vars.DOWNLOAD_URI}}/${{ steps.tag_version.outputs.new_tag }}/${{ vars.PROJECT }}.mp4)
-
-              VIDEO DURATION: ${{ needs.build-video.outputs.duration }}
-
-              VIDEO LINK: <https://vimeo.com/${{ secrets.VIMEO_VIDEO_ID }}/2f1e66d926>
-
-            draft: false
-            prerelease: true
+          draft: false
+          prerelease: true
