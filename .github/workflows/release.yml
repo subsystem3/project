@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out main branch
-        uses: actions/checkout@v3.5.3
+        uses: actions/checkout@v3
         with:
           ref: main
           fetch-depth: '0'
@@ -49,30 +49,22 @@ jobs:
             texlive-latex-extra \
             texlive-fonts-extra \
             texlive-bibtex-extra \
-            texlive-science \
+            texlive-science
 
-          # LOOK FOR .tex ONLY IN CURRENT WORKING DIRECTORY
           for file in *.tex
           do
-            # CHANGE DIRECTORY DUE TO RELATIVE PATHS IN BUILDING
             dir=$(dirname "$file")
             base=$(basename "$file")
             base_no_ext="${base%.*}"
             pushd "$dir" > /dev/null
-
-            # DELETE OLD PDF IF IT EXISTS
             rm -f "${base_no_ext}.pdf"
-
-            # BUILD PDF
             pdflatex -interaction=nonstopmode "$base"
-
-            # CLEAN
+            biber "$base_no_ext"
+            pdflatex -interaction=nonstopmode "$base"
+            pdflatex -interaction=nonstopmode "$base"
             rm -f *.aux *.log *.out *.toc *.fdb_latexmk *.fls *.synctex.gz *.bbl *.run.xml
-
-            # RETURN TO ORIGINAL DIRECTORY
             popd > /dev/null
           done
-
 
       - name: Set up Python
         uses: conda-incubator/setup-miniconda@v2
