@@ -85,11 +85,11 @@ jobs:
           ref: dev
           fetch-depth: '0'
 
-      - name: Install Git LFS
-        run: sudo apt-get install git-lfs
-
       - name: Git LFS pull
-        run: git lfs pull --include="stock/intro.mp4"
+        run: |
+          sudo apt-get install git-lfs
+          git lfs pull --include="stock/*"
+          git lfs pull --include="assets/*"
 
       - name: Cache pip packages
         uses: actions/cache@v3
