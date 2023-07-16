@@ -77,7 +77,7 @@ jobs:
         id: generate-video
         shell: bash
         run: |
-          source activate venv
+          conda activate venv
           rm -f ${{ vars.PROJECT }}.mp4
           echo "${{ secrets.KEYFILE }}" | base64 --decode > keyfile.json
           python3 pptx2video.py ${{ vars.PROJECT }}.pptx --keyfile keyfile.json
@@ -101,7 +101,7 @@ jobs:
 
       - name: Upload to Vimeo via Python API
         run: |
-          source activate venv
+          conda activate venv
           python3 upload_video.py
         env:
           VIMEO_CLIENT_ID: ${{ secrets.VIMEO_CLIENT_ID }}
