@@ -110,20 +110,20 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get -y install \
+              bc \
               ffmpeg \
               libreoffice \
-              poppler-utils \
-              bc
+              poppler-utils
 
           python3 -m pip install --upgrade pip
           python3 -m pip install \
+              google-cloud-texttospeech \
               gTTS  \
               moviepy \
-              pdf2image  \
-              python-pptx \
-              google-cloud-texttospeech \
               numpy \
-              Pillow==6.2.2
+              pdf2image  \
+              Pillow==6.2.2 \
+              python-pptx
 
           rm -f ${{ vars.PROJECT }}.mp4
           echo "${{ secrets.KEYFILE }}" | base64 --decode > keyfile.json
