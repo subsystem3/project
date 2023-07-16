@@ -123,6 +123,7 @@ class PPTXtoVideo:
         cmd = f"libreoffice --headless --convert-to pdf {self.pptx_filename}"
         subprocess.run(cmd, shell=True, check=True, env={"PATH": "/usr/bin"})
 
+
     def create_videos(self, voice_name: str = "en-US-Studio-M") -> List[AudioFileClip]:
         """
         Creates a video for each slide with a voiceover.
@@ -144,6 +145,8 @@ class PPTXtoVideo:
             images = convert_from_path(self.pdf_filename, dpi=300)
             image_filename = f"{assets_dir}/slide_{i}.png"
             images[i].save(image_filename, "PNG")
+
+            print(f"Slide {i+1} image saved as {image_filename}")
 
             # CALCULATE HASHES FOR VOICEOVER TEXT AND SLIDES
             text_hash = hashlib.md5(text.encode()).hexdigest()
@@ -175,6 +178,7 @@ class PPTXtoVideo:
                     # CREATE VOICEOVER
                     voice_filename = f"{assets_dir}/voice_{i}.wav"
                     self.text_to_wav(text, voice_filename, voice_name)
+                    print(f"Voiceover for slide {i+1} saved as {voice_filename}")
                     audio = AudioFileClip(voice_filename)
 
                     # ADD 0.5s SILENCE AT START AND END OF AUDIO (1s TOTAL BETWEEN SLIDES)
@@ -188,6 +192,7 @@ class PPTXtoVideo:
 
                     # SAVE EACH VIDEO CLIP
                     video.write_videofile(f"{assets_dir}/video_{i}.mp4", fps=24)
+                    print(f"Video for slide {i+1} saved as {video_filename}")
 
             videos.append(video)
 
