@@ -1,7 +1,6 @@
 import argparse
 import hashlib
 import os
-import shutil
 import subprocess
 from typing import List
 
@@ -123,7 +122,6 @@ class PPTXtoVideo:
         cmd = f"libreoffice --headless --convert-to pdf {self.pptx_filename}"
         subprocess.run(cmd, shell=True, check=True, env={"PATH": "/usr/bin"})
 
-
     def create_videos(self, voice_name: str = "en-US-Studio-M") -> List[AudioFileClip]:
         """
         Creates a video for each slide with a voiceover.
@@ -146,7 +144,7 @@ class PPTXtoVideo:
             image_filename = f"{assets_dir}/slide_{i}.png"
             images[i].save(image_filename, "PNG")
 
-            print(f"Slide {i+1} image saved as {image_filename}")
+            print(f"Slide {i} image saved as {image_filename}")
 
             # CALCULATE HASHES FOR VOICEOVER TEXT AND SLIDES
             text_hash = hashlib.md5(text.encode()).hexdigest()
@@ -182,7 +180,9 @@ class PPTXtoVideo:
                     audio = AudioFileClip(voice_filename)
 
                     # ADD 0.5s SILENCE AT START AND END OF AUDIO (1s TOTAL BETWEEN SLIDES)
-                    silence = AudioArrayClip(np.array([[0], [0]]), fps=44100).set_duration(0.5)
+                    silence = AudioArrayClip(
+                        np.array([[0], [0]]), fps=44100
+                    ).set_duration(0.5)
                     audio = concatenate_audioclips([silence, audio, silence])
 
                     # CREATE VIDEO CLIP FROM IMAGE AND AUDIO
@@ -214,7 +214,9 @@ class PPTXtoVideo:
                 stored_intro_hash = f.read().strip()
 
             # CHECK IF ALL INDIVIDUAL SLIDE VIDEOS EXIST
-            all_videos_exist = all(os.path.exists(f"assets/video_{i}.mp4") for i in range(len(self.slides)))
+            all_videos_exist = all(
+                os.path.exists(f"assets/video_{i}.mp4") for i in range(len(self.slides))
+            )
 
             # SKIP VIDEO GENERATION WHEN NO CHANGES DETECTED, FINAL VIDEO EXISTS, AND ALL INDIVIDUAL VIDEOS EXIST
             if (
