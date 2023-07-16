@@ -78,6 +78,13 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate venv
+          sudo apt-get update
+          sudo apt-get -y install \
+              ffmpeg \
+              libreoffice \
+              poppler-utils \
+              bc
+
           rm -f ${{ vars.PROJECT }}.mp4
           echo "${{ secrets.KEYFILE }}" | base64 --decode > keyfile.json
           python3 pptx2video.py ${{ vars.PROJECT }}.pptx --keyfile keyfile.json
