@@ -93,28 +93,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-apt-
 
+      - name: Set up Python
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: venv
+          environment-file: environment.yml
+          auto-activate-base: false
+
       - name: Generate Video
         id: generate-video
         shell: bash
         run: |
-          # INSTALL DEPENDENCIES
-          sudo apt-get update
-          sudo apt-get -y install \
-              ffmpeg \
-              libreoffice \
-              poppler-utils \
-              bc
-
-          python3 -m pip install --upgrade pip
-          python3 -m pip install \
-              gTTS  \
-              moviepy[optional] \
-              pdf2image  \
-              python-pptx \
-              google-cloud-texttospeech \
-              numpy \
-              pillow==6.2.2
-
           # REMOVE OLD VIDEO
           rm -f ${{ vars.PROJECT }}.mp4
 

@@ -95,28 +95,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-apt-
 
+      - name: Set up Python
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: venv
+          environment-file: environment.yml
+          auto-activate-base: false
+
       - name: Generate Video
         id: generate-video
         shell: bash
         run: |
-          # INSTALL DEPENDENCIES
-          sudo apt-get update
-          sudo apt-get -y install \
-              ffmpeg \
-              libreoffice \
-              poppler-utils \
-              bc
-
-          python3 -m pip install --upgrade pip
-          python3 -m pip install \
-              gTTS  \
-              moviepy[optional] \
-              pdf2image  \
-              python-pptx \
-              google-cloud-texttospeech \
-              numpy \
-              pillow==6.2.2
-
           # REMOVE OLD VIDEO
           rm -f ${{ vars.PROJECT }}.mp4
 
@@ -125,37 +114,10 @@ jobs:
           python3 pptx2video.py ${{ vars.PROJECT }}.pptx --keyfile keyfile.json
 
       - name: Upload to Vimeo via Python API
-        run: |
-          python3 -m pip install --upgrade pip
-          pip install PyVimeo
-          python3 upload_video.py
+        run: python3 upload_video.py
         env:
           VIMEO_CLIENT_ID: ${{ secrets.VIMEO_CLIENT_ID }}
           VIMEO_CLIENT_SECRET: ${{ secrets.VIMEO_CLIENT_SECRET }}
           VIMEO_ACCESS_TOKEN: ${{ secrets.VIMEO_ACCESS_TOKEN }}
           VIMEO_VIDEO_ID: ${{ secrets.VIMEO_VIDEO_ID }}
           VIDEO_PATH: ${{ vars.PROJECT }}.mp4
-
-  # comment-pr:
-  #   needs: [build-pdfs, build-video, tag]
-  #   environment: pull_request
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - name: Comment PR
-  #     uses: actions/github-script@v6
-  #     with:
-  #       script: |
-  #         const issue_number = context.payload.pull_request.number;
-  #         const artifact_url = `${context.payload.repository.html_url}/actions/runs/${context.runId}`;
-  #         const vimeo_url = `https://vimeo.com/${process.env.VIMEO_VIDEO_ID}`;
-  #         github.rest.issues.createComment({
-  #           issue_number: context.issue.number,
-  #           owner: context.repo.owner,
-  #           repo: context.repo.repo,
-  #           body: `PDFs
-  #           <${artifact_url}>
-
-  #           Vimeo Link
-  #           <https://vimeo.com/843997462/2f1e66d926>`
-
-  #         });
