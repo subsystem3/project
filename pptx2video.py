@@ -111,7 +111,7 @@ class PPTXtoVideo:
         with open(self.pptx_filename.replace(".pptx", ".txt"), "w") as f:
             f.write(f"Total duration: {self.format_duration(total_duration)}\n")
             for i, video in enumerate(videos):
-                f.write(f"\nSlide {i+1}:\n")
+                f.write(f"\nSlide {i}:\n")
                 f.write(f"Duration: {self.format_duration(video.duration)}\n")
                 f.write(f"Voiceover: {self.voiceover_texts[i]}\n")
 
@@ -166,7 +166,7 @@ class PPTXtoVideo:
                     and os.path.exists(video_filename)
                 ):
                     # SKIP IF NO CHANGES DETECTED
-                    print(f"No changes detected for slide {i+1}, skipping...")
+                    print(f"No changes detected for slide {i}, skipping...")
                     video = VideoFileClip(video_filename)
                 else:
                     # STORE HASHES FOR NEXT TIME
@@ -176,7 +176,7 @@ class PPTXtoVideo:
                     # CREATE VOICEOVER
                     voice_filename = f"{assets_dir}/voice_{i}.wav"
                     self.text_to_wav(text, voice_filename, voice_name)
-                    print(f"Voiceover for slide {i+1} saved as {voice_filename}")
+                    print(f"Voiceover for slide {i} saved as {voice_filename}")
                     audio = AudioFileClip(voice_filename)
 
                     # ADD 0.5s SILENCE AT START AND END OF AUDIO (1s TOTAL BETWEEN SLIDES)
@@ -192,7 +192,7 @@ class PPTXtoVideo:
 
                     # SAVE EACH VIDEO CLIP
                     video.write_videofile(f"{assets_dir}/video_{i}.mp4", fps=24)
-                    print(f"Video for slide {i+1} saved as {video_filename}")
+                    print(f"Video for slide {i} saved as {video_filename}")
 
             videos.append(video)
 
