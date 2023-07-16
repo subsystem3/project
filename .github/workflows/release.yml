@@ -90,7 +90,8 @@ jobs:
               pdf2image  \
               python-pptx \
               google-cloud-texttospeech \
-              numpy
+              numpy \
+              Pillow==6.2.2
 
           rm -f ${{ vars.PROJECT }}.mp4
           echo "${{ secrets.KEYFILE }}" | base64 --decode > keyfile.json
