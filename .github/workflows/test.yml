@@ -104,13 +104,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-apt-
 
-      - name: Set up Python
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          activate-environment: venv
-          environment-file: environment.yml
-          auto-activate-base: false
-
       - name: Generate Video
         id: generate-video
         shell: bash
