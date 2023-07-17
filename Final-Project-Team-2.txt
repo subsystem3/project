@@ -1,63 +1,63 @@
-Total duration: 3:35
+Total duration: 3:20
 
 Slide 0:
-Duration: 0:06
+Duration: 0:05
 Voiceover: Let’s get started. Welcome to our project titled, Brand Sentiment Analysis of Twitter Posts.
 
 Slide 1:
-Duration: 0:09
+Duration: 0:08
 Voiceover: Our team has worked diligently to develop a system that leverages AI to understand public sentiment towards brands based on Twitter posts.
 
 Slide 2:
-Duration: 0:13
+Duration: 0:12
 Voiceover: We build two models. The first model is a Brand Classifier that predicts whether a Twitter post expresses a brand. The second model is a Brand Sentiment Analyzer that predicts the sentiment of a Twitter post towards a brand.
 
 
 Slide 3:
-Duration: 0:17
+Duration: 0:16
 Voiceover: The models are trained on Twitter posts and will be scoped to only classify posts from Twitter and will not classify posts from other social media sites like Facebook, Instagram, or Reddit. The models will also process only textual data and will discard inputs with images, videos, or audio clips.
 
 Slide 4:
-Duration: 0:10
+Duration: 0:09
 Voiceover: We experimented with various machine learning algorithms like Naïve Bayes, Logistic Regression, Support Vector Machines, Recurrent Neural Networks, and Transformers.
 
 Slide 5:
-Duration: 0:06
+Duration: 0:05
 Voiceover: We used the Sentiment140 dataset, which contains 1.6 million tweets, to train our models.
 
 Slide 6:
-Duration: 0:22
+Duration: 0:21
 Voiceover: Our methods were designed to ensure a thorough and systematic approach to the problem. It involved using at least two different types of AI and machine learning algorithms. We investigated of the analytics solution to the problem, which included aspects of experimental comparison. We also explored variable importance to understand which features were most important in making good predictions.
 
 Slide 7:
-Duration: 0:13
+Duration: 0:12
 Voiceover: In the assess stage, we analyzed the dataset and selected appropriate models based on the specific requirements of the sentiment analysis task, the characteristics of the available data, and the nature of the problem.
 
 Slide 8:
-Duration: 0:13
+Duration: 0:12
 Voiceover: In the development stage, we handled invalid values and discarded non-textual content. We trained our models to identify a brand and align with the sentiment expressed in a tweet, and then tuned them to improve performance.
 
 Slide 9:
-Duration: 0:14
+Duration: 0:13
 Voiceover: In the evaluation stage, we measured the models' ability to identify brands and predict sentiment in Twitter posts. We used standard classification metrics such as Accuracy, Precision, Recall, and F1 Score to evaluate the models.
 
 Slide 10:
-Duration: 0:23
+Duration: 0:22
 Voiceover: We present the results of our experiments, including any relevant figures or tables, discuss the implications of our results, and explain whether our results support our initial hypothesis. We present the results of our models. We achieved an accuracy rate over 50%, demonstrating the potential of machine learning in understanding public sentiment towards brands based on social media content.
 
 Slide 11:
-Duration: 0:13
+Duration: 0:12
 Voiceover: We faced challenges such as the 'aboutness' problem, which refers to the challenge of determining the subject of the sentiment expressed in a sentence. We also encountered issues with complex sentences and ambiguous subjects.
 
 Slide 12:
-Duration: 0:12
+Duration: 0:11
 Voiceover: In the conclusion, we will summarize the main findings of our project, conclude the report by discussing the significance of our findings, and discuss potential future work, such as how our project could be extended or improved.
 
 Slide 13:
-Duration: 0:18
+Duration: 0:17
 Voiceover: Future work would generalize the model to work with other kinds of social media posts like Reddit, Facebook, or Instagram. Additionally, a future model can be multimodal and accept video, image, or audio input to provide a more comprehensive sentiment analysis of social media posts.
 
 
 Slide 14:
-Duration: 0:21
+Duration: 0:20
 Voiceover: We would like to take a moment to express our deepest gratitude to those who have made this project possible. We thank our advisor Dr. Van Benschoten for his invaluable guidance in this project. We also acknowledge Dr. Tarshizi for directing the Applied Artificial Intelligence program at the University of San Diego. We are truly grateful for both of your support.
