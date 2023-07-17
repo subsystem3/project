@@ -120,7 +120,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
+# .env
 .venv
 env/
 venv/
@@ -183,3 +183,6 @@ keyfile.json
 *.pdf
 # ADD PROJECT PDF
 !Final-Project-Team-2.pdf
+
+# WEIGHTS & BIASES
+wandb/
