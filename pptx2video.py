@@ -153,9 +153,7 @@ class PPTXtoVideo:
             audio = AudioFileClip(voice_filename)
 
             # ADD 0.5s SILENCE AT START AND END OF AUDIO (1s TOTAL BETWEEN SLIDES)
-            silence = AudioArrayClip(
-                np.array([[0], [0]]), fps=44100
-            ).set_duration(0.5)
+            silence = AudioArrayClip(np.array([[0], [0]]), fps=44100).set_duration(0.5)
             audio = concatenate_audioclips([silence, audio, silence])
 
             # CREATE VIDEO CLIP FROM IMAGE AND AUDIO
@@ -189,6 +187,7 @@ class PPTXtoVideo:
         videos = self.create_videos()
         self.write_metadata(videos)
         self.combine_videos(videos)
+
 
 def main():
     """
