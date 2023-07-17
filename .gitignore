@@ -186,3 +186,5 @@ keyfile.json
 
 # WEIGHTS & BIASES
 wandb/
+# TEMP MODEL FILE FOR UPLOADING MODEL ARTIFACT TO W&B
+model.pkl
