@@ -1,0 +1,633 @@
+<html xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:epub="http://www.idpf.org/2007/ops" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" epub:prefix="index: http://www.index.com/">
+
+<head>
+
+</head>
+
+<body epub:type="bodymatter">
+    <section id="P70010171580000000000000000110C7" class="level3">
+        <header>
+            <h3 class="title" id="P70010171580000000000000000110C8" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110C8" epub:type="title">
+                <span class="number">13.1 </span>
+                Representing Knowledge in an Uncertain Domain
+            </h3>
+        </header>
+        <p id="P70010171580000000000000000110C9" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110C9">
+            In
+            <a class="xref" href="fileP7001017158000000000000000010E81.xhtml#P7001017158000000000000000010E81">
+                <span class="label">Chapter </span>
+                <span class="number">12</span>
+            </a>
+            , we saw that the full joint probability distribution can answer any question about the domain, but can become intractably large as the number of variables grows. Furthermore, specifying probabilities for possible worlds one by one is unnatural and tedious.
+        </p>
+        <p id="P70010171580000000000000000110CA" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110CA">
+            We also saw that independence and conditional independence relationships among variables can greatly reduce the number of probabilities that need to be specified in order to define the full joint distribution. This section introduces a data structure called a <b>Bayesian network</b>
+            <a class="noteref noteref_footnote" id="r__P7001017158000000000000000011511" epub:type="noteref" role="doc-noteref" href="#P7001017158000000000000000011511">1</a>
+            to represent the dependencies among variables. Bayesian networks can represent essentially <i>any</i>
+            full joint probability distribution and in many cases can do so very concisely.
+        </p>
+        <aside class="footnote" id="P7001017158000000000000000011511" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P7001017158000000000000000011511" epub:type="footnote" role="doc-footnote">
+            <p>
+                <span class="number">
+                    <a href="#r__P7001017158000000000000000011511">1 </a>
+                </span>
+                Bayesian networks, often often abbreviated to &#x201C;Bayes net,&#x201D;were called <b>belief networks</b>
+                in the 1980s and 1990s. A <b>causal network</b>
+                is a Bayes net with additional constraints on the meaning of the arrows (see
+                <a class="xref" href="fileP7001017158000000000000000011485.xhtml#P7001017158000000000000000011485">
+                    <span class="label">Section </span>
+                    <span class="number">13.5</span>
+                </a>
+                ). The term <b>graphical model</b>
+                refers to a broader class that includes Bayesian networks.
+            </p>
+        </aside>
+        <aside class="marginalia" id="P70010171580000000000000000110CB" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110CB">
+            <p id="P70010171580000000000000000110CC" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110CC">
+                <i>Bayesian network</i>
+            </p>
+        </aside>
+        <p id="P70010171580000000000000000110CD" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110CD">A Bayesian network is a directed graph in which each node is annotated with quantitative probability information. The full specification is as follows:</p>
+        <ol id="P70010171580000000000000000110CE" class="ol_decimal" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110CE">
+            <li id="P70010171580000000000000000110CF" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110CF">
+                <p id="P70010171580000000000000000110D0" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110D0">Each node corresponds to a random variable, which may be discrete or continuous.</p>
+            </li>
+            <li id="P70010171580000000000000000110D1" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110D1">
+                <p id="P70010171580000000000000000110D2" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110D2">
+                    Directed links or arrows connect pairs of nodes. If there is an arrow from node
+                    <span class="inlineequation">
+                        <m:math display="inline" alttext="" data-uri="" altimg-width="15" altimg-height="15" altimg="../images/altmath_3848.png">
+                            <m:mi>X</m:mi>
+                        </m:math>
+                    </span>
+                    to node
+                    <span class="inlineequation">
+                        <m:math display="inline" alttext="" data-uri="" altimg-width="18" altimg-height="18" altimg="../images/altmath_3849.png">
+                            <m:mi>Y</m:mi>
+                            <m:mtext>,</m:mtext>
+                        </m:math>
+                    </span>
+                    <span class="inlineequation">
+                        <m:math display="inline" alttext="" data-uri="" altimg-width="15" altimg-height="15" altimg="../images/altmath_3850.png">
+                            <m:mi>X</m:mi>
+                        </m:math>
+                    </span>
+                    is said to be a <i>parent</i>
+                    of
+                    <span class="inlineequation">
+                        <m:math display="inline" alttext="" data-uri="" altimg-width="15" altimg-height="15" altimg="../images/altmath_3851.png">
+                            <m:mi>Y</m:mi>
+                        </m:math>
+                    </span>
+                    . The graph has no directed cycles and hence is a directed acyclic graph, or DAG.
+                </p>
+            </li>
+            <li id="P70010171580000000000000000110D3" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110D3">
+                <p id="P70010171580000000000000000110D4" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110D4">
+                    Each node
+                    <span class="inlineequation">
+                        <m:math display="inline" alttext="" data-uri="" altimg-width="19" altimg-height="21" altimg="../images/altmath_3852.png">
+                            <m:msub>
+                                <m:mi>X</m:mi>
+                                <m:mi>i</m:mi>
+                            </m:msub>
+                        </m:math>
+                    </span>
+                    has associated probability information
+                    <span class="inlineequation">
+                        <m:math display="inline" alttext="" data-uri="" altimg-width="145" altimg-height="27" altimg="../images/altmath_3853.png">
+                            <m:mi>&#x3B8;</m:mi>
+                            <m:mo stretchy="false">(</m:mo>
+                            <m:msub>
+                                <m:mi>X</m:mi>
+                                <m:mi>i</m:mi>
+                            </m:msub>
+                            <m:mrow>
+                                <m:mrow>
+                                    <m:mo>|</m:mo>
+                                </m:mrow>
+                            </m:mrow>
+                            <m:mi>P</m:mi>
+                            <m:mi>a</m:mi>
+                            <m:mi>r</m:mi>
+                            <m:mi>e</m:mi>
+                            <m:mi>n</m:mi>
+                            <m:mi>t</m:mi>
+                            <m:mi>s</m:mi>
+                            <m:mo stretchy="false">(</m:mo>
+                            <m:msub>
+                                <m:mi>X</m:mi>
+                                <m:mi>i</m:mi>
+                            </m:msub>
+                            <m:mo stretchy="false">)</m:mo>
+                            <m:mo stretchy="false">)</m:mo>
+                        </m:math>
+                    </span>
+                    that quantifies the effect of the parents on the node using a finite number of <b>parameters</b>
+                    .
+                </p>
+                <aside class="marginalia" id="P70010171580000000000000000110D5" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110D5">
+                    <p id="P70010171580000000000000000110D6" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110D6">
+                        <i>Parameter</i>
+                    </p>
+                </aside>
+            </li>
+        </ol>
+        <p class="continued" id="P70010171580000000000000000110D7" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110D7">
+            <span class="pagebreak" title="413" id="P70010171580000000000000000110D8" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110D8" epub:type="pagebreak" role="doc-pagebreak"></span>
+            The topology of the network &#x2014;the set of nodes and links &#x2014;specifies the conditional independence relationships that hold in the domain, in a way that will be made precise shortly. The <i>intuitive</i>
+            meaning of an arrow is typically that
+            <span class="inlineequation">
+                <m:math display="inline" alttext="" data-uri="" altimg-width="15" altimg-height="15" altimg="../images/altmath_3854.png">
+                    <m:mi>X</m:mi>
+                </m:math>
+            </span>
+            has a <i>direct influence</i>
+            on
+            <span class="inlineequation">
+                <m:math display="inline" alttext="" data-uri="" altimg-width="15" altimg-height="15" altimg="../images/altmath_3855.png">
+                    <m:mi>Y</m:mi>
+                </m:math>
+            </span>
+            , which suggests that causes should be parents of effects. It is usually easy for a domain expert to decide what direct influences exist in the domain &#x2014;much easier, in fact, than actually specifying the probabilities themselves. Once the topology of the Bayes net is laid out, we need only specify the local probability information for each variable, in the form of a conditional distribution given its parents. The full joint distribution for all the variables is defined by the topology and the local probability information.
+        </p>
+        <p id="P70010171580000000000000000110D9" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110D9">
+            Recall the simple world described in
+            <a class="xref" href="fileP7001017158000000000000000010E81.xhtml#P7001017158000000000000000010E81">
+                <span class="label">Chapter </span>
+                <span class="number">12</span>
+            </a>
+            , consisting of the variables
+            <span class="inlineequation">
+                <m:math display="inline" alttext="" data-uri="" altimg-width="94" altimg-height="17" altimg="../images/altmath_3856.png">
+                    <m:mi>T</m:mi>
+                    <m:mi>o</m:mi>
+                    <m:mi>o</m:mi>
+                    <m:mi>t</m:mi>
+                    <m:mi>h</m:mi>
+                    <m:mi>a</m:mi>
+                    <m:mi>c</m:mi>
+                    <m:mi>h</m:mi>
+                    <m:mi>e</m:mi>
+                </m:math>
+            </span>
+            ,
+            <span class="inlineequation">
+                <m:math display="inline" alttext="" data-uri="" altimg-width="62" altimg-height="20" altimg="../images/altmath_3857.png">
+                    <m:mi>C</m:mi>
+                    <m:mi>a</m:mi>
+                    <m:mi>v</m:mi>
+                    <m:mi>i</m:mi>
+                    <m:mi>t</m:mi>
+                    <m:mi>y</m:mi>
+                </m:math>
+            </span>
+            ,
+            <span class="inlineequation">
+                <m:math display="inline" alttext="" data-uri="" altimg-width="52" altimg-height="17" altimg="../images/altmath_3858.png">
+                    <m:mi>C</m:mi>
+                    <m:mi>a</m:mi>
+                    <m:mi>t</m:mi>
+                    <m:mi>c</m:mi>
+                    <m:mi>h</m:mi>
+                </m:math>
+            </span>
+            , and
+            <span class="inlineequation">
+                <m:math display="inline" alttext="" data-uri="" altimg-width="80" altimg-height="17" altimg="../images/altmath_3859.png">
+                    <m:mi>W</m:mi>
+                    <m:mi>e</m:mi>
+                    <m:mi>a</m:mi>
+                    <m:mi>t</m:mi>
+                    <m:mi>h</m:mi>
+                    <m:mi>e</m:mi>
+                    <m:mi>r</m:mi>
+                </m:math>
+            </span>
+            . We argued that
+            <span class="inlineequation">
+                <m:math display="inline" alttext="" data-uri="" altimg-width="80" altimg-height="17" altimg="../images/altmath_3860.png">
+                    <m:mi>W</m:mi>
+                    <m:mi>e</m:mi>
+                    <m:mi>a</m:mi>
+                    <m:mi>t</m:mi>
+                    <m:mi>h</m:mi>
+                    <m:mi>e</m:mi>
+                    <m:mi>r</m:mi>
+                </m:math>
+            </span>
+            is independent of the other variables; furthermore, we argued that
+            <span class="inlineequation">
+                <m:math display="inline" alttext="" data-uri="" altimg-width="94" altimg-height="17" altimg="../images/altmath_3861.png">
+                    <m:mi>T</m:mi>
+                    <m:mi>o</m:mi>
+                    <m:mi>o</m:mi>
+                    <m:mi>t</m:mi>
+                    <m:mi>h</m:mi>
+                    <m:mi>a</m:mi>
+                    <m:mi>c</m:mi>
+                    <m:mi>h</m:mi>
+                    <m:mi>e</m:mi>
+                </m:math>
+            </span>
+            and
+            <span class="inlineequation">
+                <m:math display="inline" alttext="" data-uri="" altimg-width="52" altimg-height="17" altimg="../images/altmath_3862.png">
+                    <m:mi>C</m:mi>
+                    <m:mi>a</m:mi>
+                    <m:mi>t</m:mi>
+                    <m:mi>c</m:mi>
+                    <m:mi>h</m:mi>
+                </m:math>
+            </span>
+            are conditionally independent, given
+            <span class="inlineequation">
+                <m:math display="inline" alttext="" data-uri="" altimg-width="62" altimg-height="20" altimg="../images/altmath_3863.png">
+                    <m:mi>C</m:mi>
+                    <m:mi>a</m:mi>
+                    <m:mi>v</m:mi>
+                    <m:mi>i</m:mi>
+                    <m:mi>t</m:mi>
+                    <m:mi>y</m:mi>
+                </m:math>
+            </span>
+            . These relationships are represented by the Bayes net structure shown in
+            <a class="xref" href="#P70010171580000000000000000110DA">
+                <span class="label">Figure </span>
+                <span class="number">13.1</span>
+            </a>
+            . Formally, the conditional independence of
+            <span class="inlineequation">
+                <m:math display="inline" alttext="" data-uri="" altimg-width="94" altimg-height="17" altimg="../images/altmath_3864.png">
+                    <m:mi>T</m:mi>
+                    <m:mi>o</m:mi>
+                    <m:mi>o</m:mi>
+                    <m:mi>t</m:mi>
+                    <m:mi>h</m:mi>
+                    <m:mi>a</m:mi>
+                    <m:mi>c</m:mi>
+                    <m:mi>h</m:mi>
+                    <m:mi>e</m:mi>
+                </m:math>
+            </span>
+            and
+            <span class="inlineequation">
+                <m:math display="inline" alttext="" data-uri="" altimg-width="52" altimg-height="17" altimg="../images/altmath_3865.png">
+                    <m:mi>C</m:mi>
+                    <m:mi>a</m:mi>
+                    <m:mi>t</m:mi>
+                    <m:mi>c</m:mi>
+                    <m:mi>h</m:mi>
+                </m:math>
+            </span>
+            , given
+            <span class="inlineequation">
+                <m:math display="inline" alttext="" data-uri="" altimg-width="62" altimg-height="20" altimg="../images/altmath_3866.png">
+                    <m:mi>C</m:mi>
+                    <m:mi>a</m:mi>
+                    <m:mi>v</m:mi>
+                    <m:mi>i</m:mi>
+                    <m:mi>t</m:mi>
+                    <m:mi>y</m:mi>
+                </m:math>
+            </span>
+            , is indicated by the <i>absence</i>
+            of a link between
+            <span class="inlineequation">
+                <m:math display="inline" alttext="" data-uri="" altimg-width="94" altimg-height="17" altimg="../images/altmath_3867.png">
+                    <m:mi>T</m:mi>
+                    <m:mi>o</m:mi>
+                    <m:mi>o</m:mi>
+                    <m:mi>t</m:mi>
+                    <m:mi>h</m:mi>
+                    <m:mi>a</m:mi>
+                    <m:mi>c</m:mi>
+                    <m:mi>h</m:mi>
+                    <m:mi>e</m:mi>
+                </m:math>
+            </span>
+            and
+            <span class="inlineequation">
+                <m:math display="inline" alttext="" data-uri="" altimg-width="52" altimg-height="17" altimg="../images/altmath_3868.png">
+                    <m:mi>C</m:mi>
+                    <m:mi>a</m:mi>
+                    <m:mi>t</m:mi>
+                    <m:mi>c</m:mi>
+                    <m:mi>h</m:mi>
+                </m:math>
+            </span>
+            . Intuitively, the network represents the fact that
+            <span class="inlineequation">
+                <m:math display="inline" alttext="" data-uri="" altimg-width="62" altimg-height="20" altimg="../images/altmath_3869.png">
+                    <m:mi>C</m:mi>
+                    <m:mi>a</m:mi>
+                    <m:mi>v</m:mi>
+                    <m:mi>i</m:mi>
+                    <m:mi>t</m:mi>
+                    <m:mi>y</m:mi>
+                </m:math>
+            </span>
+            is a direct cause of
+            <span class="inlineequation">
+                <m:math display="inline" alttext="" data-uri="" altimg-width="94" altimg-height="17" altimg="../images/altmath_3870.png">
+                    <m:mi>T</m:mi>
+                    <m:mi>o</m:mi>
+                    <m:mi>o</m:mi>
+                    <m:mi>t</m:mi>
+                    <m:mi>h</m:mi>
+                    <m:mi>a</m:mi>
+                    <m:mi>c</m:mi>
+                    <m:mi>h</m:mi>
+                    <m:mi>e</m:mi>
+                </m:math>
+            </span>
+            and
+            <span class="inlineequation">
+                <m:math display="inline" alttext="" data-uri="" altimg-width="52" altimg-height="17" altimg="../images/altmath_3871.png">
+                    <m:mi>C</m:mi>
+                    <m:mi>a</m:mi>
+                    <m:mi>t</m:mi>
+                    <m:mi>c</m:mi>
+                    <m:mi>h</m:mi>
+                </m:math>
+            </span>
+            , whereas no direct causal relationship exists between
+            <span class="inlineequation">
+                <m:math display="inline" alttext="" data-uri="" altimg-width="94" altimg-height="17" altimg="../images/altmath_3872.png">
+                    <m:mi>T</m:mi>
+                    <m:mi>o</m:mi>
+                    <m:mi>o</m:mi>
+                    <m:mi>t</m:mi>
+                    <m:mi>h</m:mi>
+                    <m:mi>a</m:mi>
+                    <m:mi>c</m:mi>
+                    <m:mi>h</m:mi>
+                    <m:mi>e</m:mi>
+                </m:math>
+            </span>
+            and
+            <span class="inlineequation">
+                <m:math display="inline" alttext="" data-uri="" altimg-width="52" altimg-height="17" altimg="../images/altmath_3873.png">
+                    <m:mi>C</m:mi>
+                    <m:mi>a</m:mi>
+                    <m:mi>t</m:mi>
+                    <m:mi>c</m:mi>
+                    <m:mi>h</m:mi>
+                </m:math>
+            </span>
+            .
+        </p>
+        <figure id="P70010171580000000000000000110DA" class="figure" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110DA">
+            <header>
+                <h4 class="title" id="P70010171580000000000000000110DB" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110DB" epub:type="title">
+                    <span class="label">Figure </span>
+                    <span class="number">13.1</span>
+                </h4>
+            </header>
+            <img height="244" width="488" alt="A variable named weather is independent of three other variables, cavity, toothache, and cavity. There is a link between cavity and toothache, and between cavity and catch, and no link between toothache and catch." id="P70010171580000000000000000110DC" class="fx-lightbox" data-uri="P700101715800000000000000000E6AC" src="../images/FG_13_001.png" />
+            <figcaption id="P70010171580000000000000000110DD" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110DD">
+                <div class="caption" id="P70010171580000000000000000110DE" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110DE">
+                    <p id="P70010171580000000000000000110DF" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110DF">
+                        A simple Bayesian network in which
+                        <span class="inlineequation">
+                            <m:math display="inline" alttext="" data-uri="" altimg-width="80" altimg-height="17" altimg="../images/altmath_3874.png">
+                                <m:mi>W</m:mi>
+                                <m:mi>e</m:mi>
+                                <m:mi>a</m:mi>
+                                <m:mi>t</m:mi>
+                                <m:mi>h</m:mi>
+                                <m:mi>e</m:mi>
+                                <m:mi>r</m:mi>
+                            </m:math>
+                        </span>
+                        is independent of the other three variables and
+                        <span class="inlineequation">
+                            <m:math display="inline" alttext="" data-uri="" altimg-width="94" altimg-height="17" altimg="../images/altmath_3875.png">
+                                <m:mi>T</m:mi>
+                                <m:mi>o</m:mi>
+                                <m:mi>o</m:mi>
+                                <m:mi>t</m:mi>
+                                <m:mi>h</m:mi>
+                                <m:mi>a</m:mi>
+                                <m:mi>c</m:mi>
+                                <m:mi>h</m:mi>
+                                <m:mi>e</m:mi>
+                            </m:math>
+                        </span>
+                        and
+                        <span class="inlineequation">
+                            <m:math display="inline" alttext="" data-uri="" altimg-width="52" altimg-height="17" altimg="../images/altmath_3876.png">
+                                <m:mi>C</m:mi>
+                                <m:mi>a</m:mi>
+                                <m:mi>t</m:mi>
+                                <m:mi>c</m:mi>
+                                <m:mi>h</m:mi>
+                            </m:math>
+                        </span>
+                        are conditionally independent, given
+                        <span class="inlineequation">
+                            <m:math display="inline" alttext="" data-uri="" altimg-width="62" altimg-height="20" altimg="../images/altmath_3877.png">
+                                <m:mi>C</m:mi>
+                                <m:mi>a</m:mi>
+                                <m:mi>v</m:mi>
+                                <m:mi>i</m:mi>
+                                <m:mi>t</m:mi>
+                                <m:mi>y</m:mi>
+                            </m:math>
+                        </span>
+                        .
+                    </p>
+                </div>
+            </figcaption>
+        </figure>
+        <p id="P70010171580000000000000000110E0" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110E0">Now consider the following example, which is just a little more complex. You have a new burglar alarm installed at home. It is fairly reliable at detecting a burglary, but is occasionally set off by minor earthquakes. (This example is due to Judea Pearl, a resident of earthquake-prone Los Angeles.) You also have two neighbors, John and Mary, who have promised to call you at work when they hear the alarm. John nearly always calls when he hears the alarm, but sometimes confuses the telephone ringing with the alarm and calls then, too. Mary, on the other hand, likes rather loud music and often misses the alarm altogether. Given the evidence of who has or has not called, we would like to estimate the probability of a burglary.</p>
+        <p id="P70010171580000000000000000110E1" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110E1">
+            A Bayes net for this domain appears in
+            <a class="xref" href="#P70010171580000000000000000110E2">
+                <span class="label">Figure </span>
+                <span class="number">13.2</span>
+            </a>
+            . The network structure shows that burglary and earthquakes directly affect the probability of the alarm &#x2019;s going off, but whether John and Mary call depends only on the alarm. The network thus represents our assumptions that they do not perceive burglaries directly, they do not notice minor earthquakes, and they do not confer before calling.
+        </p>
+        <figure id="P70010171580000000000000000110E2" class="figure" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110E2">
+            <header>
+                <h4 class="title" id="P70010171580000000000000000110E3" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110E3" epub:type="title">
+                    <span class="label">Figure </span>
+                    <span class="number">13.2</span>
+                </h4>
+            </header>
+            <img height="468" width="740" alt="Bayes network with a flowchart and conditional probability tables of Bayes network." aria-describedby="P70010171580000000000000000110E9" id="P70010171580000000000000000110E4" class="fx-lightbox" data-uri="P700101715800000000000000000E6AD" src="../images/FG_13_002.png" />
+            <figcaption id="P70010171580000000000000000110E5" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110E5">
+                <div class="caption" id="P70010171580000000000000000110E6" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110E6">
+                    <p id="P70010171580000000000000000110E7" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110E7">
+                        A typical Bayesian network, showing both the topology and the conditional probability tables (CPTs). In the CPTs, the letters
+                        <span class="inlineequation">
+                            <m:math display="inline" alttext="" data-uri="" altimg-width="14" altimg-height="15" altimg="../images/altmath_3878.png">
+                                <m:mi>B</m:mi>
+                            </m:math>
+                        </span>
+                        ,
+                        <span class="inlineequation">
+                            <m:math display="inline" alttext="" data-uri="" altimg-width="14" altimg-height="15" altimg="../images/altmath_3879.png">
+                                <m:mi>E</m:mi>
+                            </m:math>
+                        </span>
+                        ,
+                        <span class="inlineequation">
+                            <m:math display="inline" alttext="" data-uri="" altimg-width="13" altimg-height="15" altimg="../images/altmath_3880.png">
+                                <m:mi>A</m:mi>
+                            </m:math>
+                        </span>
+                        ,
+                        <span class="inlineequation">
+                            <m:math display="inline" alttext="" data-uri="" altimg-width="10" altimg-height="20" altimg="../images/altmath_3881.png">
+                                <m:mi>J</m:mi>
+                            </m:math>
+                        </span>
+                        , and
+                        <span class="inlineequation">
+                            <m:math display="inline" alttext="" data-uri="" altimg-width="18" altimg-height="15" altimg="../images/altmath_3882.png">
+                                <m:mi>M</m:mi>
+                            </m:math>
+                        </span>
+                        stand for <i>Burglar</i>
+                        , <i>Earthquake</i>
+                        , <i>Alarm</i>
+                        ,
+                        <span class="inlineequation">
+                            <m:math display="inline" alttext="" data-uri="" altimg-width="85" altimg-height="21" altimg="../images/altmath_3883.png">
+                                <m:mi>J</m:mi>
+                                <m:mi>o</m:mi>
+                                <m:mi>h</m:mi>
+                                <m:mi>n</m:mi>
+                                <m:mi>C</m:mi>
+                                <m:mi>a</m:mi>
+                                <m:mi>l</m:mi>
+                                <m:mi>l</m:mi>
+                                <m:mi>s</m:mi>
+                            </m:math>
+                        </span>
+                        , and
+                        <span class="inlineequation">
+                            <m:math display="inline" alttext="" data-uri="" altimg-width="96" altimg-height="21" altimg="../images/altmath_3884.png">
+                                <m:mi>M</m:mi>
+                                <m:mi>a</m:mi>
+                                <m:mi>r</m:mi>
+                                <m:mi>y</m:mi>
+                                <m:mi>C</m:mi>
+                                <m:mi>a</m:mi>
+                                <m:mi>l</m:mi>
+                                <m:mi>l</m:mi>
+                                <m:mi>s</m:mi>
+                            </m:math>
+                        </span>
+                        , respectively.
+                    </p>
+                    <p id="P70010171580000000000000000110E8" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110E8"></p>
+                </div>
+            </figcaption>
+        </figure>
+        <div class="longdesc" id="P70010171580000000000000000110E9" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P70010171580000000000000000110E9" aria-hidden="false">
+            <a class="xref" aria-hidden="false" href="../longalt/la_fg_13_002.xhtml#la_fg_13_002">Figure 13.2 Full Alternative Text</a>
+        </div>
+        <p id="P700101715800000000000000001110D" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P700101715800000000000000001110D">
+            The local probability information attached to each node in
+            <a class="xref" href="#P70010171580000000000000000110E2">
+                <span class="label">Figure </span>
+                <span class="number">13.2</span>
+            </a>
+            takes the form of a <b>conditional probability table (CPT)</b>
+            . (CPTs can be used only for discrete variables; other representations, including those suitable for continuous variables, are described in <span class="pagebreak" title="414" id="P700101715800000000000000001110E" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P700101715800000000000000001110E" epub:type="pagebreak" role="doc-pagebreak"></span>
+            <a class="xref" href="fileP7001017158000000000000000011115.xhtml#P7001017158000000000000000011115">
+                <span class="label">Section </span>
+                <span class="number">13.2</span>
+            </a>
+            .) Each row in a CPT contains the conditional probability of each node value for a <b>conditioning case</b>
+            . A conditioning case is just a possible combination of values for the parent nodes &#x2014;a miniature possible world, if you like. Each row must sum to 1, because the entries represent an exhaustive set of cases for the variable. For Boolean variables, once you know that the probability of a true value is
+            <span class="inlineequation">
+                <m:math display="inline" alttext="" data-uri="" altimg-width="11" altimg-height="16" altimg="../images/altmath_3885.png">
+                    <m:mi>p</m:mi>
+                </m:math>
+            </span>
+            , the probability of false must be
+            <span class="inlineequation">
+                <m:math display="inline" alttext="" data-uri="" altimg-width="41" altimg-height="20" altimg="../images/altmath_3886.png">
+                    <m:mn>1</m:mn>
+                    <m:mo>&#x2212;</m:mo>
+                    <m:mi>p</m:mi>
+                </m:math>
+            </span>
+            , so we often omit the second number, as in
+            <a class="xref" href="#P70010171580000000000000000110E2">
+                <span class="label">Figure </span>
+                <span class="number">13.2</span>
+            </a>
+            . In general, a table for a Boolean variable with
+            <span class="inlineequation">
+                <m:math display="inline" alttext="" data-uri="" altimg-width="12" altimg-height="16" altimg="../images/altmath_3887.png">
+                    <m:mi>k</m:mi>
+                </m:math>
+            </span>
+            Boolean parents contains
+            <span class="inlineequation">
+                <m:math display="inline" alttext="" data-uri="" altimg-width="19" altimg-height="21" altimg="../images/altmath_3888.png">
+                    <m:msup>
+                        <m:mn>2</m:mn>
+                        <m:mi>k</m:mi>
+                    </m:msup>
+                </m:math>
+            </span>
+            independently specifiable probabilities. A node with no parents has only one row, representing the prior probabilities of each possible value of the variable.
+        </p>
+        <aside class="marginalia" id="P700101715800000000000000001110F" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P700101715800000000000000001110F">
+            <p id="P7001017158000000000000000011110" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P7001017158000000000000000011110">
+                <i>Conditional probability table (CPT)</i>
+            </p>
+        </aside>
+        <aside class="marginalia" id="P7001017158000000000000000011111" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P7001017158000000000000000011111">
+            <p id="P7001017158000000000000000011112" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P7001017158000000000000000011112">
+                <i>Conditioning case</i>
+            </p>
+        </aside>
+        <p id="P7001017158000000000000000011113" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P7001017158000000000000000011113">
+            Notice that the network does not have nodes corresponding to Mary &#x2019;s currently listening to loud music or to the telephone ringing and confusing John. These factors are summarized in the uncertainty associated with the links from <i>Alarm</i>
+            to
+            <span class="inlineequation">
+                <m:math display="inline" alttext="" data-uri="" altimg-width="85" altimg-height="21" altimg="../images/altmath_3889.png">
+                    <m:mi>J</m:mi>
+                    <m:mi>o</m:mi>
+                    <m:mi>h</m:mi>
+                    <m:mi>n</m:mi>
+                    <m:mi>C</m:mi>
+                    <m:mi>a</m:mi>
+                    <m:mi>l</m:mi>
+                    <m:mi>l</m:mi>
+                    <m:mi>s</m:mi>
+                </m:math>
+            </span>
+            and
+            <span class="inlineequation">
+                <m:math display="inline" alttext="" data-uri="" altimg-width="96" altimg-height="21" altimg="../images/altmath_3890.png">
+                    <m:mi>M</m:mi>
+                    <m:mi>a</m:mi>
+                    <m:mi>r</m:mi>
+                    <m:mi>y</m:mi>
+                    <m:mi>C</m:mi>
+                    <m:mi>a</m:mi>
+                    <m:mi>l</m:mi>
+                    <m:mi>l</m:mi>
+                    <m:mi>s</m:mi>
+                </m:math>
+            </span>
+            . This shows both laziness and ignorance in operation, as explained on page <a class="pageref" href="fileP7001017158000000000000000010E89.xhtml#P7001017158000000000000000010E98">386</a>
+            : it would be a lot of work to find out why those factors would be more or less likely in any particular case, and we have no reasonable way to obtain the relevant information anyway.
+        </p>
+        <p id="P7001017158000000000000000011114" data-uri="M13_RUSS0993_04_SE_C13.xhtml#P7001017158000000000000000011114">
+            The probabilities actually summarize a <i>potentially infinite</i>
+            set of circumstances in which the alarm might fail to go off (high humidity, power failure, dead battery, cut wires, a dead mouse stuck inside the bell, etc.) or John or Mary might fail to call and report it (out to lunch, on vacation, temporarily deaf, passing helicopter, etc.). In this way, a small agent can cope with a very large world, at least approximately.
+        </p>
+    </section>
+</body>
+
+
+</html>
