@@ -1,15 +1,18 @@
 import argparse
-import hashlib
 import os
+import shutil
 import subprocess
 from typing import List
 
+import numpy as np
 from google.cloud import texttospeech as tts
 from gtts import gTTS
+from moviepy.audio.AudioClip import AudioArrayClip
 from moviepy.editor import (
     AudioFileClip,
     ImageClip,
     VideoFileClip,
+    concatenate_audioclips,
     concatenate_videoclips,
 )
 from moviepy.video.compositing.transitions import crossfadein, crossfadeout
@@ -32,20 +35,6 @@ class PPTXtoVideo:
             slide.notes_slide.notes_text_frame.text for slide in self.slides
         ]
 
-    def hash_file(self, filename):
-        """
-        Calculates the MD5 hash of a file.
-
-        Args:
-            filename (str): The name of the file to hash.
-
-        Returns:
-            str: The MD5 hash of the file.
-        """
-        with open(filename, "rb") as f:
-            file_hash = hashlib.md5(f.read()).hexdigest()
-        return file_hash
-
     def text_to_wav(self, text: str, filename: str, voice_name: str = "en-US-Studio-M"):
         """
         Converts the given text to speech and saves it as a .wav file.
@@ -59,7 +48,6 @@ class PPTXtoVideo:
             voice_name (str, optional): The name of the voice to use for speech generation.
                 This should be a voice name from Google Cloud Text-to-Speech (e.g., "en-US-Studio-M").
                 Defaults to "en-US-Studio-M".
-                List of voices at: https://cloud.google.com/text-to-speech/docs/voices
         """
         # USE PROFESSIONAL VOICES FROM GOOGLE CLOUD
         if "GOOGLE_APPLICATION_CREDENTIALS" in os.environ:
@@ -108,7 +96,7 @@ class PPTXtoVideo:
         with open(self.pptx_filename.replace(".pptx", ".txt"), "w") as f:
             f.write(f"Total duration: {self.format_duration(total_duration)}\n")
             for i, video in enumerate(videos):
-                f.write(f"\nSlide {i}:\n")
+                f.write(f"\nSlide {i+1}:\n")
                 f.write(f"Duration: {self.format_duration(video.duration)}\n")
                 f.write(f"Voiceover: {self.voiceover_texts[i]}\n")
 
@@ -117,42 +105,34 @@ class PPTXtoVideo:
         Converts the .pptx file to a .pdf file using LibreOffice.
         """
         cmd = f"libreoffice --headless --convert-to pdf {self.pptx_filename}"
-        subprocess.run(cmd, shell=True, check=True, env={"PATH": "/usr/bin"})
+        subprocess.run(cmd, shell=True, check=True)
 
-    def create_videos(self, voice_name: str = "en-US-Studio-M") -> List[AudioFileClip]:
+    def create_videos(self) -> List[AudioFileClip]:
         """
         Creates a video for each slide with a voiceover.
-
-        Args:
-            voice_name (str, optional): The name of the voice to use for speech generation.
-                This should be a voice name from Google Cloud Text-to-Speech (e.g., "en-US-Studio-M").
-                Defaults to "en-US-Studio-M".
-                List of voices at: https://cloud.google.com/text-to-speech/docs/voices
 
         Returns:
             List[AudioFileClip]: List of video clips.
         """
         videos = []
         assets_dir = "assets"
+        if os.path.exists(assets_dir):
+            shutil.rmtree(assets_dir)
         os.makedirs(assets_dir, exist_ok=True)
-        for i, slide in enumerate(self.slides):
+        for i, _ in enumerate(self.slides):
             text = self.voiceover_texts[i]
             images = convert_from_path(self.pdf_filename, dpi=300)
-            image_filename = f"{assets_dir}/slide_{i}.png"
-            images[i].save(image_filename, "PNG")
-            print(f"Slide {i} image saved as {image_filename}")
-            # CREATE VOICEOVER
+            images[i].save(f"{assets_dir}/slide_{i}.png", "PNG")
             voice_filename = f"{assets_dir}/voice_{i}.wav"
             self.text_to_wav(text, voice_filename)
-            print(f"Voiceover for slide {i} saved as {voice_filename}")
             audio = AudioFileClip(voice_filename)
-            # CREATE VIDEO CLIP FROM IMAGE AND AUDIO
-            img_clip = ImageClip(image_filename, duration=audio.duration)
+            # Create a silent audio clip of 0.5 seconds
+            silence = AudioArrayClip(np.array([[0], [0]]), fps=44100).set_duration(0.5)
+            # Add silence to the beginning and end of the audio
+            audio = concatenate_audioclips([silence, audio, silence])
+            img_clip = ImageClip(f"{assets_dir}/slide_{i}.png", duration=audio.duration)
             video = img_clip.set_audio(audio)
-            # SAVE EACH VIDEO CLIP
-            video.write_videofile(f"{assets_dir}/video_{i}.mp4", fps=24)
             videos.append(video)
-
         return videos
 
     def combine_videos(self, videos: List[AudioFileClip]):
@@ -163,13 +143,13 @@ class PPTXtoVideo:
             videos (List[AudioFileClip]): List of video clips.
         """
         intro_clip = VideoFileClip("stock/intro.mp4")
-        intro_clip = crossfadeout(intro_clip, 1)
-        videos[0] = crossfadein(videos[0], 1)
-        videos.insert(0, intro_clip)
-        final_clip = concatenate_videoclips(videos)
+        final_clip = concatenate_videoclips(videos, method="compose")
         final_clip.write_videofile(self.output_file, fps=24)
 
     def convert(self):
+        """
+        Converts the PowerPoint presentation to a video.
+        """
         self.convert_to_pdf()
         videos = self.create_videos()
         self.write_metadata(videos)
@@ -178,16 +158,18 @@ class PPTXtoVideo:
 
 def main():
     """
-    Parse command line args and convert PowerPoint to video.
+    Main function to test the PPTXtoVideo class.
     """
     parser = argparse.ArgumentParser(
         description="Convert a PowerPoint presentation to a video."
     )
+
     parser.add_argument(
         "pptx",
         type=str,
         help="The name of the PowerPoint file to convert.",
     )
+
     parser.add_argument(
         "--keyfile",
         type=str,
@@ -196,6 +178,7 @@ def main():
     )
 
     args = parser.parse_args()
+
     if args.keyfile:
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = args.keyfile
 
