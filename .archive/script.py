@@ -5,7 +5,6 @@ import joblib
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-import wandb
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
@@ -17,6 +16,8 @@ from sklearn.metrics import (
 )
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.svm import LinearSVC
+
+import wandb
 
 dotenv.load_dotenv()
 wandb.finish()
