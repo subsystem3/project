@@ -13,7 +13,6 @@ from functools import wraps
 from pprint import pprint
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
-import colorama
 import dotenv
 import joblib
 import matplotlib.pyplot as plt
@@ -24,6 +23,8 @@ import pandas as pd
 import preprocessor
 import seaborn as sns
 from adjustText import adjust_text
+from colorama import Fore, Style
+from IPython.display import clear_output, display
 from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer
 from sklearn.feature_extraction.text import CountVectorizer
