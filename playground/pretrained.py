@@ -1,21 +1,33 @@
 import pandas as pd
 import tensorflow as tf
-from transformers import (
-    BertTokenizer,
-    TFBertForSequenceClassification,
-    GPT2Tokenizer,
-    TFGPT2ForSequenceClassification,
-    RobertaTokenizer,
-    TFRobertaForSequenceClassification,
-    XLMTokenizer,
-    TFXLMForSequenceClassification,
-    DistilBertTokenizer,
-    TFDistilBertForSequenceClassification,
-)
-from transformers import InputExample, InputFeatures
 from sklearn.model_selection import train_test_split
-import wandb
+from transformers import (
+    AlbertTokenizer,
+    BertTokenizer,
+    DistilBertTokenizer,
+    ElectraTokenizer,
+    GPT2Tokenizer,
+    InputExample,
+    InputFeatures,
+    LongformerTokenizer,
+    MobileBertTokenizer,
+    RobertaTokenizer,
+    TFAlbertForSequenceClassification,
+    TFBertForSequenceClassification,
+    TFDistilBertForSequenceClassification,
+    TFElectraForSequenceClassification,
+    TFGPT2ForSequenceClassification,
+    TFLongformerForSequenceClassification,
+    TFMobileBertForSequenceClassification,
+    TFRobertaForSequenceClassification,
+    TFXLMForSequenceClassification,
+    TFXLNetForSequenceClassification,
+    XLMTokenizer,
+    XLNetTokenizer,
+)
 from wandb.keras import WandbCallback
+
+import wandb
 
 # Load data
 df = pd.read_csv(
@@ -43,14 +55,60 @@ y_sentiment = df["sentiment"]
 
 # Define the models and their corresponding tokenizers
 models = [
-    (TFBertForSequenceClassification, BertTokenizer, "bert-base-uncased"),
-    (TFGPT2ForSequenceClassification, GPT2Tokenizer, "gpt2"),
-    (TFRobertaForSequenceClassification, RobertaTokenizer, "roberta-base"),
-    (TFXLMForSequenceClassification, XLMTokenizer, "xlm-mlm-enfr-1024"),
+    (
+        TFBertForSequenceClassification,
+        BertTokenizer,
+        "bert-base-uncased",
+    ),
     (
         TFDistilBertForSequenceClassification,
         DistilBertTokenizer,
         "distilbert-base-uncased",
+    ),
+    (
+        TFMobileBertForSequenceClassification,
+        MobileBertTokenizer,
+        "google/mobilebert-uncased",
+    ),
+    (
+        TFGPT2ForSequenceClassification,
+        GPT2Tokenizer,
+        "gpt2",
+    ),
+    (
+        TFRobertaForSequenceClassification,
+        RobertaTokenizer,
+        "roberta-base",
+    ),
+    (
+        TFXLMForSequenceClassification,
+        XLMTokenizer,
+        "xlm-mlm-enfr-1024",
+    ),
+    (
+        TFXLNetForSequenceClassification,
+        XLNetTokenizer,
+        "xlnet-large-cased",
+    ),
+    (
+        TFAlbertForSequenceClassification,
+        AlbertTokenizer,
+        "albert-xxlarge-v2",
+    ),
+    (
+        TFElectraForSequenceClassification,
+        ElectraTokenizer,
+        "google/electra-large-discriminator",
+    ),
+    (
+        TFLongformerForSequenceClassification,
+        LongformerTokenizer,
+        "allenai/longformer-large-4096",
+    ),
+    (
+        TFRobertaForSequenceClassification,
+        RobertaTokenizer,
+        "roberta-large",
     ),
 ]
 
@@ -195,7 +253,9 @@ for model_class, tokenizer_class, pretrained_weights in models:
                 train_acc_metric.update_state(y_batch_train, logits)
 
                 # Print metrics to the console
-                print(f"Step: {step}, Training Accuracy: {train_acc_metric.result().numpy()}, Training Loss: {loss_value.numpy()}")
+                print(
+                    f"Step: {step}, Training Accuracy: {train_acc_metric.result().numpy()}, Training Loss: {loss_value.numpy()}"
+                )
 
                 # Log metrics to wandb at every step
                 wandb.log(
