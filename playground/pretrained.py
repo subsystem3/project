@@ -191,7 +191,11 @@ for model_class, tokenizer_class, pretrained_weights in models:
             train_data,
             epochs=2,
             validation_data=validation_data,
-            callbacks=[WandbCallback()],
+            callbacks=[
+                WandbCallback(
+                    monitor="val_loss", verbose=1, mode="auto", save_weights_only=False
+                )
+            ],
         )
 
         # Evaluate the model
@@ -203,6 +207,9 @@ for model_class, tokenizer_class, pretrained_weights in models:
         # Save the model in the SavedModel format
         model.save("model", save_format="tf")
         run.save("model")
+
+        # Log the model
+        wandb.save("model.h5")
 
         # Finish the wandb run
         wandb.finish()
