@@ -212,11 +212,10 @@ for model_class, tokenizer_class, pretrained_weights in models:
         model = model_class.from_pretrained(pretrained_weights)
         tokenizer = tokenizer_class.from_pretrained(pretrained_weights)
 
-        # Define the optimizer and loss function
-        optimizer = tf.keras.optimizers.Adam(
-            learning_rate=3e-5, epsilon=1e-08, clipnorm=1.0
-        )
+        # Define the optimizer, loss function and metric
+        optimizer = tf.keras.optimizers.Adam(learning_rate=3e-5, epsilon=1e-08, clipnorm=1.0)
         loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+        train_acc_metric = tf.keras.metrics.SparseCategoricalAccuracy()
 
         # Compile the model
         model.compile(optimizer=optimizer, loss=loss_fn, metrics=[train_acc_metric])
@@ -226,24 +225,11 @@ for model_class, tokenizer_class, pretrained_weights in models:
         test_InputExamples = convert_data_to_examples(X_test, y_test)
 
         # Convert the InputExamples to tf.data.Dataset
-        train_data = convert_examples_to_tf_dataset(
-            list(train_InputExamples), tokenizer
-        )
+        train_data = convert_examples_to_tf_dataset(list(train_InputExamples), tokenizer)
         train_data = train_data.shuffle(100).batch(32).repeat(2)
 
-        validation_data = convert_examples_to_tf_dataset(
-            list(test_InputExamples), tokenizer
-        )
+        validation_data = convert_examples_to_tf_dataset(list(test_InputExamples), tokenizer)
         validation_data = validation_data.batch(32)
-
-        # Define the optimizer and loss function
-        optimizer = tf.keras.optimizers.Adam(
-            learning_rate=3e-5, epsilon=1e-08, clipnorm=1.0
-        )
-        loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-
-        # Define the metric
-        train_acc_metric = tf.keras.metrics.SparseCategoricalAccuracy()
 
         # Custom training loop
         for epoch in range(2):
