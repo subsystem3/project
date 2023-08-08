@@ -1,9 +1,9 @@
-import pandas as pd
-import tensorflow as tf
 import os
 
-from tensorflow import keras
+import pandas as pd
+import tensorflow as tf
 from sklearn.model_selection import train_test_split
+from tensorflow import keras
 from transformers import (
     AlbertTokenizer,
     BertTokenizer,
@@ -31,6 +31,10 @@ from transformers import (
 from wandb.keras import WandbCallback
 
 import wandb
+
+if not os.path.exists("models"):
+    os.makedirs("models")
+
 
 # Load data
 df = pd.read_csv(
