@@ -1,5 +1,8 @@
 import pandas as pd
 import tensorflow as tf
+import os
+
+from tensorflow import keras
 from sklearn.model_selection import train_test_split
 from transformers import (
     AlbertTokenizer,
@@ -212,11 +215,17 @@ for model_class, tokenizer_class, pretrained_weights in models:
         model = model_class.from_pretrained(pretrained_weights)
         tokenizer = tokenizer_class.from_pretrained(pretrained_weights)
 
-        # Define the optimizer and loss function
+        # Check if the checkpoint exists
+        if os.path.exists(f"models/{pretrained_weights}_{label}.h5"):
+            # Load the weights
+            model.load_weights(f"models/{pretrained_weights}_{label}.h5")
+
+        # Define the optimizer, loss function and metric
         optimizer = tf.keras.optimizers.Adam(
             learning_rate=3e-5, epsilon=1e-08, clipnorm=1.0
         )
         loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+        train_acc_metric = tf.keras.metrics.SparseCategoricalAccuracy()
 
         # Compile the model
         model.compile(optimizer=optimizer, loss=loss_fn, metrics=[train_acc_metric])
@@ -229,21 +238,12 @@ for model_class, tokenizer_class, pretrained_weights in models:
         train_data = convert_examples_to_tf_dataset(
             list(train_InputExamples), tokenizer
         )
-        train_data = train_data.shuffle(100).batch(32).repeat(2)
+        train_data = train_data.shuffle(100).batch(16).repeat(2)
 
         validation_data = convert_examples_to_tf_dataset(
             list(test_InputExamples), tokenizer
         )
-        validation_data = validation_data.batch(32)
-
-        # Define the optimizer and loss function
-        optimizer = tf.keras.optimizers.Adam(
-            learning_rate=3e-5, epsilon=1e-08, clipnorm=1.0
-        )
-        loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-
-        # Define the metric
-        train_acc_metric = tf.keras.metrics.SparseCategoricalAccuracy()
+        validation_data = validation_data.batch(16)
 
         # Custom training loop
         for epoch in range(2):
@@ -274,21 +274,15 @@ for model_class, tokenizer_class, pretrained_weights in models:
                     }
                 )
 
+            # Save the model's weights after each epoch
+            model.save_weights(f"models/{pretrained_weights}_{label}.h5")
+
             # Reset the metrics at the end of each epoch
             train_acc_metric.reset_states()
 
-        # Evaluate the model
         loss, accuracy = model.evaluate(validation_data)
-
-        # Log the metrics
         wandb.log({"loss": loss, "accuracy": accuracy})
-
-        # Save the model in the SavedModel format
-        model.save("model", save_format="tf")
-        run.save("model")
-
-        # Log the model
-        wandb.save("model.h5")
-
-        # Finish the wandb run
+        model.save(f"models/{pretrained_weights}_{label}", save_format="tf")
+        run.save(f"models/{pretrained_weights}_{label}")
+        wandb.save(f"models/{pretrained_weights}_{label}.h5")
         wandb.finish()
