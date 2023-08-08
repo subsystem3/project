@@ -150,14 +150,6 @@ for model_class, tokenizer_class, pretrained_weights in models:
             project="brand-sentiment", name=f"{pretrained_weights}_{label}"
         )
 
-        # Log the configurations
-        config = wandb.config
-        config.learning_rate = 3e-5
-        config.epochs = 2
-        config.batch_size = 32
-        config.model = pretrained_weights
-        config.task = label
-
         # Load pretrained model/tokenizer
         model = model_class.from_pretrained(pretrained_weights)
         tokenizer = tokenizer_class.from_pretrained(pretrained_weights)
@@ -177,26 +169,44 @@ for model_class, tokenizer_class, pretrained_weights in models:
         )
         validation_data = validation_data.batch(32)
 
-        # Compile the model
-        model.compile(
-            optimizer=tf.keras.optimizers.Adam(
-                learning_rate=3e-5, epsilon=1e-08, clipnorm=1.0
-            ),
-            loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-            metrics=[tf.keras.metrics.SparseCategoricalAccuracy("accuracy")],
+        # Define the optimizer and loss function
+        optimizer = tf.keras.optimizers.Adam(
+            learning_rate=3e-5, epsilon=1e-08, clipnorm=1.0
         )
+        loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
 
-        # Train the model
-        model.fit(
-            train_data,
-            epochs=2,
-            validation_data=validation_data,
-            callbacks=[
-                WandbCallback(
-                    monitor="val_loss", verbose=1, mode="auto", save_weights_only=False
+        # Define the metric
+        train_acc_metric = tf.keras.metrics.SparseCategoricalAccuracy()
+
+        # Custom training loop
+        for epoch in range(2):
+            print(f"Start of epoch {epoch+1}")
+            for step, (x_batch_train, y_batch_train) in enumerate(train_data):
+                with tf.GradientTape() as tape:
+                    # Get model outputs
+                    model_outputs = model(x_batch_train, training=True)
+                    # Extract logits
+                    logits = model_outputs.logits
+                    loss_value = loss_fn(y_batch_train, logits)
+                grads = tape.gradient(loss_value, model.trainable_weights)
+                optimizer.apply_gradients(zip(grads, model.trainable_weights))
+
+                # Update training metric
+                train_acc_metric.update_state(y_batch_train, logits)
+
+                # Print metrics to the console
+                print(f"Step: {step}, Training Accuracy: {train_acc_metric.result().numpy()}, Training Loss: {loss_value.numpy()}")
+
+                # Log metrics to wandb at every step
+                wandb.log(
+                    {
+                        "train_accuracy": train_acc_metric.result().numpy(),
+                        "train_loss": loss_value.numpy(),
+                    }
                 )
-            ],
-        )
+
+            # Reset the metrics at the end of each epoch
+            train_acc_metric.reset_states()
 
         # Evaluate the model
         loss, accuracy = model.evaluate(validation_data)
