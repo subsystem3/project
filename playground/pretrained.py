@@ -212,6 +212,15 @@ for model_class, tokenizer_class, pretrained_weights in models:
         model = model_class.from_pretrained(pretrained_weights)
         tokenizer = tokenizer_class.from_pretrained(pretrained_weights)
 
+        # Define the optimizer and loss function
+        optimizer = tf.keras.optimizers.Adam(
+            learning_rate=3e-5, epsilon=1e-08, clipnorm=1.0
+        )
+        loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+
+        # Compile the model
+        model.compile(optimizer=optimizer, loss=loss_fn, metrics=[train_acc_metric])
+
         # Convert the data to InputExamples
         train_InputExamples = convert_data_to_examples(X_train, y_train)
         test_InputExamples = convert_data_to_examples(X_test, y_test)
