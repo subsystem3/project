@@ -76,7 +76,7 @@ def convert_examples_to_tf_dataset(examples, tokenizer, max_length=128):
             max_length=max_length,
             return_token_type_ids=True,
             return_attention_mask=True,
-            pad_to_max_length=True,
+            padding="max_length",
             truncation=True,
         )
 
@@ -200,9 +200,9 @@ for model_class, tokenizer_class, pretrained_weights in models:
         # Log the metrics
         wandb.log({"loss": loss, "accuracy": accuracy})
 
-        # Save the model weights
-        model.save_weights("./model_weights.h5")
-        run.save("./model_weights.h5")
+        # Save the model in the SavedModel format
+        model.save("model", save_format="tf")
+        run.save("model")
 
         # Finish the wandb run
         wandb.finish()
