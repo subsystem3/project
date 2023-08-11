@@ -35,7 +35,9 @@ class PPTXtoVideo:
             slide.notes_slide.notes_text_frame.text for slide in self.slides
         ]
 
-    def text_to_wav(self, text: str, filename: str, voice_name: str = "en-US-Studio-M"):
+    def text_to_wav(
+        self, text: str, filename: str, voice_name: str = "en-US-Standard-J"
+    ):
         """
         Converts the given text to speech and saves it as a .wav file.
 
@@ -46,8 +48,8 @@ class PPTXtoVideo:
             text (str): The text to convert to speech.
             filename (str): The name of the .wav file to save the speech to.
             voice_name (str, optional): The name of the voice to use for speech generation.
-                This should be a voice name from Google Cloud Text-to-Speech (e.g., "en-US-Studio-M").
-                Defaults to "en-US-Studio-M".
+                This should be a voice name from Google Cloud Text-to-Speech (e.g., "en-US-Standard-J").
+                Defaults to "en-US-Standard-J".
         """
         # USE PROFESSIONAL VOICES FROM GOOGLE CLOUD
         if "GOOGLE_APPLICATION_CREDENTIALS" in os.environ:
