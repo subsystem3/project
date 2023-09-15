@@ -7,7 +7,7 @@ jobs:
   delete_artifacts:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Delete All Artifacts
         uses: jimschubert/delete-artifacts-action@v1
         with:
