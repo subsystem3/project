@@ -1,6 +1,6 @@
 google-cloud-texttospeech==2.14.1
 gTTS==2.3.2
-jupyterlab==4.0.2
+jupyterlab==4.0.11
 keras==2.13.1
 moviepy[optional]==1.0.3
 numpy==1.23.3
